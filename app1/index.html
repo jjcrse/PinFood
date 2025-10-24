@@ -1,37 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Login y Registro | App1</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <!-- 🔹 SECCIÓN DE AUTENTICACIÓN -->
-    <div class="container" id="auth-section">
-      <h2>Registro</h2>
-      <form id="register-form">
-        <input id="reg-name" type="text" placeholder="Nombre completo" required />
-        <input id="reg-email" type="email" placeholder="Correo electrónico" required />
-        <input id="reg-pass" type="password" placeholder="Contraseña" required />
-        <button type="submit">Registrar</button>
-      </form>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App de Comida</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🍕 App de Comida</h1>
+    <p id="msg"></p>
 
-      <h2>Login</h2>
-      <form id="login-form">
-        <input type="email" id="login-email" placeholder="Correo electrónico" required />
-        <input type="password" id="login-pass" placeholder="Contraseña" required />
-        <button type="submit">Iniciar sesión</button>
-      </form>
+    <!-- SECCIÓN DE AUTENTICACIÓN -->
+    <div id="auth-section">
+      <div class="auth-form">
+        <h2>Registro</h2>
+        <form id="register-form">
+          <input type="text" id="reg-name" placeholder="Nombre completo" required />
+          <input type="email" id="reg-email" placeholder="Correo electrónico" required />
+          <input type="password" id="reg-pass" placeholder="Contraseña" required />
+          <button type="submit">Registrarse</button>
+        </form>
+      </div>
 
-      <p id="msg"></p>
+      <div class="auth-form">
+        <h2>Iniciar Sesión</h2>
+        <form id="login-form">
+          <input type="email" id="login-email" placeholder="Correo electrónico" required />
+          <input type="password" id="login-pass" placeholder="Contraseña" required />
+          <button type="submit">Entrar</button>
+        </form>
+      </div>
     </div>
 
-    <!-- 🔹 SECCIÓN DE BIENVENIDA (oculta por defecto) -->
-    <div class="container" id="welcome-section">
-      <h1 id="welcome-msg">Bienvenido 👋</h1>
-      <button id="logout">Cerrar sesión</button>
+    <!-- SECCIÓN DE BIENVENIDA -->
+    <div id="welcome-section" style="display: none;">
+      <h2 id="welcome-msg"></h2>
+      <div class="welcome-buttons">
+        <button id="go-to-feed" class="btn-primary">Ver Feed 📰</button>
+        <button id="logout" class="btn-secondary">Cerrar Sesión</button>
+      </div>
     </div>
 
-    <script type="module" src="./app.js"></script>
-  </body>
+    <!-- SECCIÓN DEL FEED -->
+    <div id="feed-section" style="display: none;">
+      <div class="feed-header">
+        <h2>📰 Feed de Publicaciones</h2>
+        <button id="back-to-welcome" class="btn-secondary">← Volver</button>
+      </div>
+
+      <!-- FORMULARIO PARA CREAR PUBLICACIÓN -->
+      <div class="create-post">
+        <h3>✍️ Crear una publicación</h3>
+        <form id="post-form">
+          <textarea 
+            id="post-content" 
+            placeholder="¿Qué estás comiendo hoy?" 
+            rows="4" 
+            required
+          ></textarea>
+          <input 
+            type="url" 
+            id="post-image" 
+            placeholder="URL de la imagen (opcional)"
+          />
+          <button type="submit" class="btn-primary">Publicar</button>
+        </form>
+      </div>
+
+      <!-- CONTENEDOR DE PUBLICACIONES -->
+      <div id="feed-container" class="feed-container">
+        <p>Cargando publicaciones...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
 </html>

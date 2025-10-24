@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login y Registro | App1</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- 🔹 SECCIÓN DE AUTENTICACIÓN -->
+    <div class="container" id="auth-section">
+      <h2>Registro</h2>
+      <form id="register-form">
+        <input id="reg-name" type="text" placeholder="Nombre completo" required />
+        <input id="reg-email" type="email" placeholder="Correo electrónico" required />
+        <input id="reg-pass" type="password" placeholder="Contraseña" required />
+        <button type="submit">Registrar</button>
+      </form>
+
+      <h2>Login</h2>
+      <form id="login-form">
+        <input type="email" id="login-email" placeholder="Correo electrónico" required />
+        <input type="password" id="login-pass" placeholder="Contraseña" required />
+        <button type="submit">Iniciar sesión</button>
+      </form>
+
+      <p id="msg"></p>
+    </div>
+
+    <!-- 🔹 SECCIÓN DE BIENVENIDA (oculta por defecto) -->
+    <div class="container" id="welcome-section">
+      <h1 id="welcome-msg">Bienvenido 👋</h1>
+      <button id="logout">Cerrar sesión</button>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

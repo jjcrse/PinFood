@@ -1,6 +1,6 @@
 ## install REST Client or humao.rest-client to execute this
 
-GET http://localhost:300/users
+GET http://localhost:3000/users
 
 ###
 

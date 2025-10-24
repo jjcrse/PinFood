@@ -1,5 +1,8 @@
 import { supabase } from "../services/supabaseClient.js";
 
+// 🔧 MODO DESARROLLO - Simular autenticación sin Supabase real
+const isDevelopmentMode = true; // Forzar modo demo para desarrollo
+
 // 🧾 REGISTRO
 export const register = async (req, res) => {
   try {
@@ -10,6 +13,22 @@ export const register = async (req, res) => {
     }
 
     console.log("📩 Datos recibidos:", req.body);
+
+    // 🔧 MODO DESARROLLO - Simular registro exitoso
+    if (isDevelopmentMode) {
+      console.log("🔧 Modo desarrollo: Simulando registro exitoso");
+      const mockUser = {
+        id: `demo_${Date.now()}`,
+        email,
+        full_name,
+        role: "user"
+      };
+      
+      return res.status(200).json({ 
+        message: "Usuario registrado exitosamente (modo demo)", 
+        user: mockUser 
+      });
+    }
 
     // 1️⃣ Crear usuario en Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -56,6 +75,35 @@ export const login = async (req, res) => {
       return res.status(400).json({ error: "Email y contraseña requeridos" });
     }
 
+    // 🔧 MODO DESARROLLO - Simular login exitoso
+    if (isDevelopmentMode) {
+      console.log("🔧 Modo desarrollo: Simulando login exitoso");
+      console.log("📧 Email recibido:", email);
+      console.log("🔑 Password recibido:", password);
+      
+      const mockUser = {
+        id: `demo_${Date.now()}`,
+        email,
+        full_name: "Usuario Demo",
+        role: "user"
+      };
+      
+      const mockSession = {
+        access_token: `demo_token_${Date.now()}`,
+        refresh_token: `demo_refresh_${Date.now()}`,
+        expires_at: Date.now() + 3600000, // 1 hora
+        user: mockUser
+      };
+      
+      console.log("✅ Respuesta mock enviada:", { message: "Inicio de sesión exitoso (modo demo)" });
+      
+      return res.status(200).json({
+        message: "Inicio de sesión exitoso (modo demo)",
+        session: mockSession,
+        user: mockUser,
+      });
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -82,6 +130,12 @@ export const login = async (req, res) => {
 // 🚪 LOGOUT
 export const logout = async (req, res) => {
   try {
+    // 🔧 MODO DESARROLLO - Simular logout exitoso
+    if (isDevelopmentMode) {
+      console.log("🔧 Modo desarrollo: Simulando logout exitoso");
+      return res.status(200).json({ message: "Sesión cerrada exitosamente (modo demo)" });
+    }
+
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     res.status(200).json({ message: "Sesión cerrada exitosamente" });

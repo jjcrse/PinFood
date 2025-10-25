@@ -3,7 +3,6 @@ dotenv.config({ path: "./.env" }); // ✅ fuerza a cargar .env antes que nada
 
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -15,8 +14,6 @@ import feedRouter from "./server/routes/feed.router.js"; // 🆕 NUEVO
 
 // Servicio de Supabase
 import { supabase } from "./server/services/supabaseClient.js";
-
-dotenv.config();
 
 // ============================
 // CONFIGURACIÓN PRINCIPAL

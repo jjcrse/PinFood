@@ -6,10 +6,15 @@ const msg = document.getElementById("msg");
 const authSection = document.getElementById("auth-section");
 const welcomeSection = document.getElementById("welcome-section");
 const feedSection = document.getElementById("feed-section");
+const myProfileSection = document.getElementById("my-profile-section");
+const userProfileSection = document.getElementById("user-profile-section");
 const welcomeMsg = document.getElementById("welcome-msg");
 const logoutBtn = document.getElementById("logout");
 const goToFeedBtn = document.getElementById("go-to-feed");
+const goToProfileBtn = document.getElementById("go-to-profile");
 const backToWelcomeBtn = document.getElementById("back-to-welcome");
+const backFromMyProfileBtn = document.getElementById("back-from-my-profile");
+const backFromUserProfileBtn = document.getElementById("back-from-user-profile");
 
 let currentUser = null;
 
@@ -108,6 +113,8 @@ logoutBtn.addEventListener("click", () => {
   authSection.style.display = "block";
   welcomeSection.style.display = "none";
   feedSection.style.display = "none";
+  myProfileSection.style.display = "none";
+  userProfileSection.style.display = "none";
   msg.textContent = "";
 });
 
@@ -200,7 +207,7 @@ async function cargarFeed() {
           return `
             <div class="post-card" data-post-id="${post.id}">
               <div class="post-header">
-                <strong>${post.users?.full_name || post.users?.email || "Usuario"}</strong>
+                <strong class="user-name-link" onclick="verPerfilUsuario('${post.user_id}', '${post.users?.full_name || post.users?.email || "Usuario"}')">${post.users?.full_name || post.users?.email || "Usuario"}</strong>
                 <small>${new Date(post.created_at).toLocaleString()}</small>
               </div>
               <p class="post-content">${post.content}</p>
@@ -493,5 +500,226 @@ function mostrarBienvenida(user) {
   authSection.style.display = "none";
   welcomeSection.style.display = "flex";
   feedSection.style.display = "none";
+  myProfileSection.style.display = "none";
+  userProfileSection.style.display = "none";
   welcomeMsg.textContent = `Bienvenido, ${user?.email || user?.full_name || "Usuario"} 👋`;
 }
+
+// 👤 IR A MI PERFIL
+goToProfileBtn.addEventListener("click", () => {
+  welcomeSection.style.display = "none";
+  myProfileSection.style.display = "block";
+  cargarMiPerfil();
+});
+
+// ⬅️ VOLVER DESDE MI PERFIL
+backFromMyProfileBtn.addEventListener("click", () => {
+  myProfileSection.style.display = "none";
+  welcomeSection.style.display = "flex";
+});
+
+// ⬅️ VOLVER DESDE PERFIL DE USUARIO
+backFromUserProfileBtn.addEventListener("click", () => {
+  userProfileSection.style.display = "none";
+  feedSection.style.display = "block";
+});
+
+// 📱 CARGAR MI PERFIL
+async function cargarMiPerfil() {
+  const profileContent = document.getElementById("my-profile-content");
+  profileContent.innerHTML = "<p>Cargando perfil...</p>";
+
+  if (!currentUser) {
+    profileContent.innerHTML = "<p>Error: No hay usuario logueado</p>";
+    return;
+  }
+
+  console.log("👤 currentUser completo:", currentUser);
+  console.log("🆔 currentUser.id:", currentUser.id);
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/profile/${currentUser.id}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      profileContent.innerHTML = `<p>Error al cargar perfil: ${data.error}</p>`;
+      return;
+    }
+
+    const { user, posts } = data;
+
+    profileContent.innerHTML = `
+      <div class="profile-container">
+        <div class="profile-header-card">
+          <div class="profile-picture">
+            ${user.profile_picture_url 
+              ? `<img src="${user.profile_picture_url}" alt="Foto de perfil" />` 
+              : `<div class="profile-placeholder">👤</div>`
+            }
+          </div>
+          <div class="profile-info">
+            <h3>${user.full_name || "Usuario"}</h3>
+            <p class="profile-email">📧 ${user.email}</p>
+            <p class="profile-description">${user.description || "Sin descripción"}</p>
+            <p class="profile-stats">📊 ${posts.length} publicaciones</p>
+          </div>
+        </div>
+
+        <button id="edit-profile-btn" class="btn-primary">✏️ Editar Perfil</button>
+
+        <div id="edit-profile-form" style="display: none;" class="edit-profile-form">
+          <h3>Editar Perfil</h3>
+          <input type="text" id="edit-name" placeholder="Nombre completo" value="${user.full_name || ""}" />
+          <textarea id="edit-description" placeholder="Descripción" rows="3">${user.description || ""}</textarea>
+          <input type="url" id="edit-picture-url" placeholder="URL de foto de perfil" value="${user.profile_picture_url || ""}" />
+          <div style="display: flex; gap: 10px;">
+            <button id="save-profile-btn" class="btn-primary">💾 Guardar</button>
+            <button id="cancel-edit-btn" class="btn-secondary">❌ Cancelar</button>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 30px;">Mis Publicaciones</h3>
+        <div class="feed-container">
+          ${posts.length === 0 
+            ? "<p>No has publicado nada aún</p>" 
+            : posts.map(post => `
+              <div class="post-card">
+                <div class="post-header">
+                  <strong>${user.full_name || user.email}</strong>
+                  <small>${new Date(post.created_at).toLocaleString()}</small>
+                </div>
+                <p class="post-content">${post.content}</p>
+                ${post.image_url ? `<img src="${post.image_url}" alt="Imagen del post" class="post-image">` : ""}
+                <div class="post-actions">
+                  <span>❤️ ${post.likes?.[0]?.count || 0} Me gusta</span>
+                  <span>💬 ${post.comments?.[0]?.count || 0} Comentarios</span>
+                </div>
+              </div>
+            `).join("")
+          }
+        </div>
+      </div>
+    `;
+
+    // Event listeners para editar perfil
+    document.getElementById("edit-profile-btn").addEventListener("click", () => {
+      document.getElementById("edit-profile-form").style.display = "block";
+    });
+
+    document.getElementById("cancel-edit-btn").addEventListener("click", () => {
+      document.getElementById("edit-profile-form").style.display = "none";
+    });
+
+    document.getElementById("save-profile-btn").addEventListener("click", async () => {
+      await guardarPerfil(user.id);
+    });
+
+  } catch (err) {
+    console.error("❌ Error al cargar perfil:", err);
+    profileContent.innerHTML = "<p>Error al cargar perfil</p>";
+  }
+}
+
+// 💾 GUARDAR PERFIL
+async function guardarPerfil(userId) {
+  const full_name = document.getElementById("edit-name").value.trim();
+  const description = document.getElementById("edit-description").value.trim();
+  const profile_picture_url = document.getElementById("edit-picture-url").value.trim();
+
+  const sessionData = localStorage.getItem("session");
+  if (!sessionData) {
+    alert("Sesión expirada");
+    return;
+  }
+
+  const session = JSON.parse(sessionData);
+  const token = session.access_token;
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/profile/${userId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({ full_name, description, profile_picture_url }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("✅ Perfil actualizado exitosamente");
+      document.getElementById("edit-profile-form").style.display = "none";
+      cargarMiPerfil();
+    } else {
+      alert(`Error: ${data.error}`);
+    }
+  } catch (err) {
+    console.error("❌ Error al guardar perfil:", err);
+    alert("Error al guardar perfil");
+  }
+}
+
+// 👥 VER PERFIL DE OTRO USUARIO
+window.verPerfilUsuario = async function(userId, userName) {
+  feedSection.style.display = "none";
+  userProfileSection.style.display = "block";
+
+  const profileContent = document.getElementById("user-profile-content");
+  profileContent.innerHTML = "<p>Cargando perfil...</p>";
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/profile/${userId}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      profileContent.innerHTML = `<p>Error al cargar perfil: ${data.error}</p>`;
+      return;
+    }
+
+    const { user, posts } = data;
+
+    profileContent.innerHTML = `
+      <div class="profile-container">
+        <div class="profile-header-card">
+          <div class="profile-picture">
+            ${user.profile_picture_url 
+              ? `<img src="${user.profile_picture_url}" alt="Foto de perfil" />` 
+              : `<div class="profile-placeholder">👤</div>`
+            }
+          </div>
+          <div class="profile-info">
+            <h3>${user.full_name || "Usuario"}</h3>
+            <p class="profile-description">${user.description || "Sin descripción"}</p>
+            <p class="profile-stats">📊 ${posts.length} publicaciones</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 30px;">Publicaciones</h3>
+        <div class="feed-container">
+          ${posts.length === 0 
+            ? "<p>No hay publicaciones</p>" 
+            : posts.map(post => `
+              <div class="post-card">
+                <div class="post-header">
+                  <strong>${user.full_name || user.email}</strong>
+                  <small>${new Date(post.created_at).toLocaleString()}</small>
+                </div>
+                <p class="post-content">${post.content}</p>
+                ${post.image_url ? `<img src="${post.image_url}" alt="Imagen del post" class="post-image">` : ""}
+                <div class="post-actions">
+                  <span>❤️ ${post.likes?.[0]?.count || 0} Me gusta</span>
+                  <span>💬 ${post.comments?.[0]?.count || 0} Comentarios</span>
+                </div>
+              </div>
+            `).join("")
+          }
+        </div>
+      </div>
+    `;
+
+  } catch (err) {
+    console.error("❌ Error al cargar perfil:", err);
+    profileContent.innerHTML = "<p>Error al cargar perfil</p>";
+  }
+};

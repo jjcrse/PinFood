@@ -12,6 +12,7 @@ import usersRouter from "./server/routes/users.router.js";
 import authRouter from "./server/routes/authRoutes.js";
 import feedRouter from "./server/routes/feed.router.js";
 import restaurantsRouter from "./server/routes/restaurants.router.js"; // 🍕 Restaurantes
+import profileRouter from "./server/routes/profile.router.js"; // 👤 Perfiles
 
 // Servicio de Supabase
 import { supabase } from "./server/services/supabaseClient.js";
@@ -46,6 +47,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/feed", feedRouter);
 app.use("/api/restaurants", restaurantsRouter); // 🍕 Restaurantes
+app.use("/api/profile", profileRouter); // 👤 Perfiles
 
 // ============================
 // PRUEBA DE CONEXIÓN A SUPABASE

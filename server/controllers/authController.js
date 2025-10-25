@@ -1,7 +1,7 @@
 import { supabase } from "../services/supabaseClient.js";
 
 // 🔧 MODO DESARROLLO - Simular autenticación sin Supabase real
-const isDevelopmentMode = true; // Forzar modo demo para desarrollo
+const isDevelopmentMode = false; // Cambiar a false para usar Supabase real
 
 // 🧾 REGISTRO
 export const register = async (req, res) => {
@@ -59,7 +59,17 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: dbError.message });
     }
 
-    res.status(200).json({ message: "Usuario registrado exitosamente", user });
+    res.status(200).json({ 
+      message: "Usuario registrado exitosamente", 
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: full_name,
+        role: "user",
+        profile_picture_url: null,
+        description: null,
+      }
+    });
   } catch (error) {
     console.error("❌ Error general en register:", error);
     res.status(500).json({ error: "Error interno del servidor" });
@@ -116,10 +126,30 @@ export const login = async (req, res) => {
       return res.status(400).json({ error: error.message });
     }
 
+    const { user, session } = data;
+
+    // Obtener datos extra desde la tabla users
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("full_name, role, profile_picture_url, description")
+      .eq("id", user.id)
+      .single();
+
+    if (userError) {
+      console.error("❌ Error al obtener datos del usuario:", userError);
+    }
+
     res.status(200).json({
       message: "Inicio de sesión exitoso",
-      session: data.session,
-      user: data.user,
+      session: session,
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: userData?.full_name || user.user_metadata?.full_name || email,
+        role: userData?.role || "user",
+        profile_picture_url: userData?.profile_picture_url || null,
+        description: userData?.description || null,
+      },
     });
   } catch (error) {
     console.error("❌ Error general en login:", error);

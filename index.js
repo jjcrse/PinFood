@@ -10,7 +10,8 @@ import { fileURLToPath } from "url";
 import screen1Router from "./server/routes/screen1Events.router.js";
 import usersRouter from "./server/routes/users.router.js";
 import authRouter from "./server/routes/authRoutes.js";
-import feedRouter from "./server/routes/feed.router.js"; // 🆕 NUEVO
+import feedRouter from "./server/routes/feed.router.js";
+import restaurantsRouter from "./server/routes/restaurants.router.js"; // 🍕 Restaurantes
 
 // Servicio de Supabase
 import { supabase } from "./server/services/supabaseClient.js";
@@ -43,7 +44,8 @@ app.use("/app2", express.static(path.join(__dirname, "app2")));
 app.use("/api/screen1", screen1Router);
 app.use("/api/users", usersRouter);
 app.use("/api/auth", authRouter);
-app.use("/api/feed", feedRouter); // 🆕 NUEVO
+app.use("/api/feed", feedRouter);
+app.use("/api/restaurants", restaurantsRouter); // 🍕 Restaurantes
 
 // ============================
 // PRUEBA DE CONEXIÓN A SUPABASE

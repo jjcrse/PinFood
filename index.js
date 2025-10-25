@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config({ path: "./.env" }); // ✅ fuerza a cargar .env antes que nada
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";

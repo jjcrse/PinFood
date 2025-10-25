@@ -301,6 +301,7 @@ h3 {
 
 .btn-like,
 .btn-comment,
+.btn-save,
 .btn-delete {
   padding: 8px 15px;
   border: none;
@@ -328,6 +329,16 @@ h3 {
 
 .btn-comment:hover {
   background: #cce5ff;
+  transform: scale(1.05);
+}
+
+.btn-save {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.btn-save:hover {
+  background: #ffe0b2;
   transform: scale(1.05);
 }
 
@@ -614,6 +625,103 @@ h3 {
   text-decoration: underline;
 }
 
+/* BUSCADOR DE RESTAURANTES */
+.search-restaurants {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+}
+
+.search-restaurants h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.search-box button {
+  padding: 12px 30px;
+  white-space: nowrap;
+}
+
+.restaurants-results {
+  margin-top: 20px;
+}
+
+.results-count {
+  color: #666;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.restaurants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.restaurant-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  gap: 15px;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.restaurant-icon {
+  font-size: 2.5em;
+  flex-shrink: 0;
+}
+
+.restaurant-info {
+  flex: 1;
+}
+
+.restaurant-info h4 {
+  color: #667eea;
+  margin: 0 0 10px 0;
+  font-size: 1.2em;
+}
+
+.restaurant-description {
+  color: #555;
+  font-size: 0.95em;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.restaurant-location {
+  color: #888;
+  font-size: 0.9em;
+  margin: 0;
+}
+
 /* RESPONSIVE PARA PERFILES */
 @media (max-width: 600px) {
   .profile-header-card {
@@ -628,5 +736,17 @@ h3 {
 
   .profile-info h3 {
     font-size: 1.5em;
+  }
+
+  .search-box {
+    flex-direction: column;
+  }
+
+  .search-box button {
+    width: 100%;
+  }
+
+  .restaurants-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -123,6 +123,7 @@ goToFeedBtn.addEventListener("click", () => {
   welcomeSection.style.display = "none";
   feedSection.style.display = "block";
   cargarFeed();
+  cargarRestaurantes(""); // Cargar todos los restaurantes al inicio
 });
 
 // ⬅️ VOLVER A BIENVENIDA
@@ -219,6 +220,9 @@ async function cargarFeed() {
                 </button>
                 <button class="btn-comment" onclick="toggleComments('${post.id}')">
                   💬 ${commentsCount} Comentarios
+                </button>
+                <button class="btn-save" onclick="toggleSavePost('${post.id}')">
+                  🔖 Guardar
                 </button>
                 ${isOwner ? `<button class="btn-delete" onclick="eliminarPost('${post.id}')">🗑️ Eliminar</button>` : ""}
               </div>
@@ -598,6 +602,11 @@ async function cargarMiPerfil() {
             `).join("")
           }
         </div>
+
+        <h3 style="margin-top: 30px;">🔖 Publicaciones Guardadas</h3>
+        <div id="saved-posts-container" class="feed-container">
+          <p>Cargando publicaciones guardadas...</p>
+        </div>
       </div>
     `;
 
@@ -614,9 +623,56 @@ async function cargarMiPerfil() {
       await guardarPerfil(user.id);
     });
 
+    // Cargar posts guardados
+    cargarPostsGuardados(user.id);
+
   } catch (err) {
     console.error("❌ Error al cargar perfil:", err);
     profileContent.innerHTML = "<p>Error al cargar perfil</p>";
+  }
+}
+
+// 📚 CARGAR POSTS GUARDADOS
+async function cargarPostsGuardados(userId) {
+  const container = document.getElementById("saved-posts-container");
+  if (!container) return;
+
+  container.innerHTML = "<p>Cargando publicaciones guardadas...</p>";
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/saved-posts/user/${userId}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      container.innerHTML = `<p>Error al cargar: ${data.error}</p>`;
+      return;
+    }
+
+    const { posts } = data;
+
+    if (posts.length === 0) {
+      container.innerHTML = "<p>No has guardado ninguna publicación aún</p>";
+      return;
+    }
+
+    container.innerHTML = posts.map(post => `
+      <div class="post-card">
+        <div class="post-header">
+          <strong class="user-name-link" onclick="verPerfilUsuario('${post.user_id}', '${post.users?.full_name || post.users?.email}')">${post.users?.full_name || post.users?.email || "Usuario"}</strong>
+          <small>${new Date(post.created_at).toLocaleString()}</small>
+        </div>
+        <p class="post-content">${post.content}</p>
+        ${post.image_url ? `<img src="${post.image_url}" alt="Imagen del post" class="post-image">` : ""}
+        <div class="post-actions">
+          <span>❤️ ${post.likes?.[0]?.count || 0} Me gusta</span>
+          <span>💬 ${post.comments?.[0]?.count || 0} Comentarios</span>
+          <button class="btn-save" onclick="toggleSavePost('${post.id}')">🗑️ Quitar</button>
+        </div>
+      </div>
+    `).join("");
+  } catch (err) {
+    console.error("❌ Error al cargar posts guardados:", err);
+    container.innerHTML = "<p>Error al cargar publicaciones guardadas</p>";
   }
 }
 
@@ -721,5 +777,137 @@ window.verPerfilUsuario = async function(userId, userName) {
   } catch (err) {
     console.error("❌ Error al cargar perfil:", err);
     profileContent.innerHTML = "<p>Error al cargar perfil</p>";
+  }
+};
+
+// 🔍 BUSCAR RESTAURANTES
+document.getElementById("search-restaurant-btn").addEventListener("click", () => {
+  const query = document.getElementById("search-restaurant-input").value.trim();
+  cargarRestaurantes(query);
+});
+
+// Buscar al presionar Enter
+document.getElementById("search-restaurant-input").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    const query = document.getElementById("search-restaurant-input").value.trim();
+    cargarRestaurantes(query);
+  }
+});
+
+// 🍴 CARGAR RESTAURANTES
+async function cargarRestaurantes(query = "") {
+  const resultsContainer = document.getElementById("restaurants-results");
+  resultsContainer.innerHTML = "<p>Buscando restaurantes...</p>";
+
+  try {
+    const url = query 
+      ? `http://localhost:3000/api/restaurants/search?query=${encodeURIComponent(query)}`
+      : `http://localhost:3000/api/restaurants/search`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!res.ok) {
+      resultsContainer.innerHTML = `<p>Error al buscar: ${data.error}</p>`;
+      return;
+    }
+
+    const { restaurants } = data;
+
+    if (restaurants.length === 0) {
+      resultsContainer.innerHTML = query
+        ? `<p>No se encontraron restaurantes con "${query}"</p>`
+        : "<p>No hay restaurantes registrados aún</p>";
+      return;
+    }
+
+    resultsContainer.innerHTML = `
+      <p class="results-count">Se encontraron ${restaurants.length} restaurante(s)</p>
+      <div class="restaurants-grid">
+        ${restaurants.map(restaurant => `
+          <div class="restaurant-card">
+            <div class="restaurant-icon">🍽️</div>
+            <div class="restaurant-info">
+              <h4>${restaurant.restaurant_name}</h4>
+              ${restaurant.descripcion ? `<p class="restaurant-description">${restaurant.descripcion}</p>` : ""}
+              ${restaurant.ubicacion ? `<p class="restaurant-location">📍 ${restaurant.ubicacion}</p>` : ""}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  } catch (err) {
+    console.error("❌ Error al cargar restaurantes:", err);
+    resultsContainer.innerHTML = "<p>Error al cargar restaurantes</p>";
+  }
+}
+
+// 🔖 GUARDAR/QUITAR GUARDADO DE POST
+window.toggleSavePost = async function(postId) {
+  const sessionData = localStorage.getItem("session");
+  if (!sessionData) {
+    alert("Debes iniciar sesión para guardar publicaciones");
+    return;
+  }
+
+  let session;
+  try {
+    session = JSON.parse(sessionData);
+  } catch (e) {
+    console.error("Error al parsear sesión:", e);
+    alert("Sesión inválida. Por favor inicia sesión nuevamente.");
+    return;
+  }
+
+  const token = session.access_token;
+  if (!token) {
+    alert("Token no encontrado. Por favor inicia sesión nuevamente.");
+    return;
+  }
+
+  try {
+    // Primero verificar si ya está guardado
+    const checkRes = await fetch(`http://localhost:3000/api/saved-posts/${postId}/check`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    const checkData = await checkRes.json();
+
+    if (checkData.isSaved) {
+      // Si ya está guardado, quitarlo
+      const res = await fetch(`http://localhost:3000/api/saved-posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        alert("✅ Publicación removida de guardados");
+      } else {
+        const data = await res.json();
+        alert(`Error: ${data.error || "No se pudo quitar el guardado"}`);
+      }
+    } else {
+      // Si no está guardado, guardarlo
+      const res = await fetch(`http://localhost:3000/api/saved-posts/${postId}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        alert("✅ Publicación guardada exitosamente");
+      } else {
+        const data = await res.json();
+        alert(`Error: ${data.error || "No se pudo guardar la publicación"}`);
+      }
+    }
+  } catch (err) {
+    console.error("❌ Error al guardar/quitar guardado:", err);
+    alert("Error de conexión");
   }
 };

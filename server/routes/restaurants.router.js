@@ -1,7 +1,10 @@
 import express from "express";
-import { registerRestaurant, loginRestaurant } from "../controllers/restaurant.controller.js";
+import { registerRestaurant, loginRestaurant, searchRestaurants } from "../controllers/restaurant.controller.js";
 
 const router = express.Router();
+
+// 🔍 GET /api/restaurants/search
+router.get("/search", searchRestaurants);
 
 // 📝 POST /api/restaurants/register
 router.post("/register", registerRestaurant);

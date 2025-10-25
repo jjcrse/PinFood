@@ -54,6 +54,36 @@ export async function registerRestaurant(req, res) {
   }
 }
 
+// 🔍 BUSCAR RESTAURANTES
+export async function searchRestaurants(req, res) {
+  try {
+    const { query } = req.query;
+
+    let restaurantsQuery = supabase
+      .from("restaurants")
+      .select("id, restaurant_name, email, descripcion, ubicacion, creado_en");
+
+    // Si hay query, filtrar por nombre
+    if (query && query.trim() !== "") {
+      restaurantsQuery = restaurantsQuery.ilike("restaurant_name", `%${query}%`);
+    }
+
+    const { data: restaurants, error } = await restaurantsQuery
+      .order("restaurant_name", { ascending: true })
+      .limit(20);
+
+    if (error) throw error;
+
+    res.status(200).json({
+      restaurants: restaurants || [],
+      count: restaurants?.length || 0,
+    });
+  } catch (err) {
+    console.error("❌ Error al buscar restaurantes:", err);
+    res.status(500).json({ error: "Error al buscar restaurantes" });
+  }
+}
+
 // 🔐 LOGIN DE RESTAURANTE
 export async function loginRestaurant(req, res) {
   try {

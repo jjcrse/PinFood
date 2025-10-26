@@ -124,3 +124,69 @@ export async function loginRestaurant(req, res) {
   }
 }
 
+// 📝 OBTENER POSTS DONDE UN RESTAURANTE FUE ETIQUETADO
+export async function getRestaurantPosts(req, res) {
+  try {
+    const { restaurantId } = req.params;
+
+    console.log("📝 Obteniendo posts para restaurante:", restaurantId);
+
+    // Obtener posts donde el restaurante está etiquetado
+    const { data: posts, error: postsError } = await supabase
+      .from("posts")
+      .select("id, content, image_url, created_at, user_id")
+      .eq("restaurant_id", restaurantId)
+      .order("created_at", { ascending: false });
+
+    if (postsError) {
+      console.error("❌ Error al obtener posts:", postsError);
+      return res.status(500).json({ error: "Error al obtener posts: " + postsError.message });
+    }
+
+    console.log(`✅ Se encontraron ${posts?.length || 0} posts`);
+
+    if (!posts || posts.length === 0) {
+      return res.status(200).json({ posts: [], count: 0 });
+    }
+
+    // Enriquecer posts con información de usuarios, likes y comentarios
+    const postsWithData = await Promise.all(
+      posts.map(async (post) => {
+        // Obtener info del usuario
+        const { data: user } = await supabase
+          .from("users")
+          .select("id, full_name, email, profile_picture_url")
+          .eq("id", post.user_id)
+          .single();
+
+        // Contar likes
+        const { count: likesCount } = await supabase
+          .from("likes")
+          .select("*", { count: "exact", head: true })
+          .eq("post_id", post.id);
+
+        // Contar comentarios
+        const { count: commentsCount } = await supabase
+          .from("comments")
+          .select("*", { count: "exact", head: true })
+          .eq("post_id", post.id);
+
+        return {
+          ...post,
+          users: user,
+          likes: [{ count: likesCount || 0 }],
+          comments: [{ count: commentsCount || 0 }],
+        };
+      })
+    );
+
+    res.status(200).json({
+      posts: postsWithData,
+      count: postsWithData.length,
+    });
+  } catch (err) {
+    console.error("❌ Error al obtener posts del restaurante:", err);
+    res.status(500).json({ error: "Error al obtener posts del restaurante" });
+  }
+}
+

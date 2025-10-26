@@ -123,7 +123,6 @@ goToFeedBtn.addEventListener("click", () => {
   welcomeSection.style.display = "none";
   feedSection.style.display = "block";
   cargarFeed();
-  cargarRestaurantes(""); // Cargar todos los restaurantes al inicio
   cargarRestaurantesParaEtiquetar(); // Cargar restaurantes en el select
 });
 
@@ -816,18 +815,38 @@ window.verPerfilUsuario = async function(userId, userName) {
   }
 };
 
-// 🔍 BUSCAR RESTAURANTES
-document.getElementById("search-restaurant-btn").addEventListener("click", () => {
-  const query = document.getElementById("search-restaurant-input").value.trim();
-  cargarRestaurantes(query);
+// 🔽 TOGGLE SECCIÓN DE RESTAURANTES
+document.getElementById("toggle-restaurants-btn").addEventListener("click", () => {
+  const section = document.getElementById("search-restaurants-section");
+  const icon = document.getElementById("toggle-icon");
+  
+  if (section.classList.contains("collapsed")) {
+    section.classList.remove("collapsed");
+    section.classList.add("expanded");
+    icon.textContent = "▲";
+  } else {
+    section.classList.remove("expanded");
+    section.classList.add("collapsed");
+    icon.textContent = "▼";
+  }
 });
 
-// Buscar al presionar Enter
-document.getElementById("search-restaurant-input").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    const query = document.getElementById("search-restaurant-input").value.trim();
-    cargarRestaurantes(query);
-  }
+// 🔍 BUSCAR RESTAURANTES EN TIEMPO REAL
+let searchTimeout;
+document.getElementById("search-restaurant-input").addEventListener("input", (e) => {
+  clearTimeout(searchTimeout);
+  const query = e.target.value.trim();
+  
+  // Esperar 500ms después de que el usuario deje de escribir
+  searchTimeout = setTimeout(() => {
+    if (query.length > 0) {
+      cargarRestaurantes(query);
+    } else {
+      // Si el campo está vacío, mostrar mensaje amigable
+      document.getElementById("restaurants-results").innerHTML = 
+        '<p class="search-hint">✍️ Escribe para buscar restaurantes...</p>';
+    }
+  }, 500);
 });
 
 // 🍴 CARGAR RESTAURANTES
@@ -858,15 +877,14 @@ async function cargarRestaurantes(query = "") {
     }
 
     resultsContainer.innerHTML = `
-      <p class="results-count">Se encontraron ${restaurants.length} restaurante(s)</p>
-      <div class="restaurants-grid">
+      <p class="results-count">📍 ${restaurants.length} restaurante(s) encontrado(s)</p>
+      <div class="restaurants-list">
         ${restaurants.map(restaurant => `
-          <div class="restaurant-card">
-            <div class="restaurant-icon">🍽️</div>
-            <div class="restaurant-info">
-              <h4>${restaurant.restaurant_name}</h4>
-              ${restaurant.descripcion ? `<p class="restaurant-description">${restaurant.descripcion}</p>` : ""}
-              ${restaurant.ubicacion ? `<p class="restaurant-location">📍 ${restaurant.ubicacion}</p>` : ""}
+          <div class="restaurant-item">
+            <span class="restaurant-emoji">🍽️</span>
+            <div class="restaurant-details">
+              <strong class="restaurant-title">${restaurant.restaurant_name}</strong>
+              ${restaurant.ubicacion ? `<span class="restaurant-loc">📍 ${restaurant.ubicacion}</span>` : ""}
             </div>
           </div>
         `).join("")}

@@ -6,7 +6,7 @@ export const createPost = async (req, res) => {
     console.log("📥 Recibiendo petición para crear post...");
     console.log("📦 Body:", req.body);
     
-    const { content, image_url } = req.body;
+    const { content, image_url, restaurant_id } = req.body;
     const authHeader = req.headers.authorization;
 
     console.log("🔑 Authorization header:", authHeader ? "Presente" : "Ausente");
@@ -43,6 +43,7 @@ export const createPost = async (req, res) => {
       user_id: user.id,
       content: content.trim(),
       image_url: image_url || null,
+      restaurant_id: restaurant_id || null,
     });
 
     const { data, error } = await supabase
@@ -52,6 +53,7 @@ export const createPost = async (req, res) => {
           user_id: user.id,
           content: content.trim(),
           image_url: image_url || null,
+          restaurant_id: restaurant_id || null,
         },
       ])
       .select();
@@ -108,6 +110,17 @@ export const getFeed = async (req, res) => {
           .eq("id", post.user_id)
           .single();
 
+        // Obtener info del restaurante (si está etiquetado)
+        let restaurantData = null;
+        if (post.restaurant_id) {
+          const { data: restaurant } = await supabase
+            .from("restaurants")
+            .select("id, restaurant_name, ubicacion")
+            .eq("id", post.restaurant_id)
+            .single();
+          restaurantData = restaurant;
+        }
+
         // Contar likes
         const { count: likesCount } = await supabase
           .from("likes")
@@ -123,6 +136,7 @@ export const getFeed = async (req, res) => {
         return {
           ...post,
           users: userData || { id: post.user_id, full_name: "Usuario", email: "" },
+          restaurant: restaurantData,
           likes: [{ count: likesCount || 0 }],
           comments: [{ count: commentsCount || 0 }],
         };

@@ -16,17 +16,10 @@ export async function getUserProfile(req, res) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    // Obtener posts del usuario
+    // Obtener posts del usuario (sin relaciones complejas)
     const { data: posts, error: postsError } = await supabase
       .from("posts")
-      .select(`
-        id,
-        content,
-        image_url,
-        created_at,
-        likes:likes(count),
-        comments:comments(count)
-      `)
+      .select("id, content, image_url, created_at, restaurant_id")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
@@ -34,10 +27,43 @@ export async function getUserProfile(req, res) {
       console.error("Error al obtener posts:", postsError);
     }
 
+    // Enriquecer posts con likes, comments y restaurant info
+    const postsWithData = await Promise.all(
+      (posts || []).map(async (post) => {
+        // Obtener info del restaurante (si está etiquetado)
+        let restaurantData = null;
+        if (post.restaurant_id) {
+          const { data: restaurant } = await supabase
+            .from("restaurants")
+            .select("id, restaurant_name, ubicacion")
+            .eq("id", post.restaurant_id)
+            .single();
+          restaurantData = restaurant;
+        }
+
+        const { count: likesCount } = await supabase
+          .from("likes")
+          .select("*", { count: "exact", head: true })
+          .eq("post_id", post.id);
+
+        const { count: commentsCount } = await supabase
+          .from("comments")
+          .select("*", { count: "exact", head: true })
+          .eq("post_id", post.id);
+
+        return {
+          ...post,
+          restaurant: restaurantData,
+          likes: [{ count: likesCount || 0 }],
+          comments: [{ count: commentsCount || 0 }],
+        };
+      })
+    );
+
     res.status(200).json({
       user,
-      posts: posts || [],
-      postsCount: posts?.length || 0,
+      posts: postsWithData || [],
+      postsCount: postsWithData?.length || 0,
     });
   } catch (err) {
     console.error("❌ Error al obtener perfil:", err);

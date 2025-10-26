@@ -107,7 +107,7 @@ export async function getSavedPosts(req, res) {
 
     const { data: posts, error: postsError } = await supabase
       .from("posts")
-      .select("id, content, image_url, created_at, user_id")
+      .select("id, content, image_url, created_at, user_id, restaurant_id")
       .in("id", postIds);
 
     if (postsError) {
@@ -117,7 +117,7 @@ export async function getSavedPosts(req, res) {
 
     console.log("📝 Posts obtenidos:", posts?.length || 0);
 
-    // Obtener información de usuarios
+    // Obtener información de usuarios y restaurantes
     const postsWithUsers = await Promise.all(
       posts.map(async (post) => {
         const { data: user } = await supabase
@@ -125,6 +125,17 @@ export async function getSavedPosts(req, res) {
           .select("id, full_name, email, profile_picture_url")
           .eq("id", post.user_id)
           .single();
+
+        // Obtener info del restaurante (si está etiquetado)
+        let restaurantData = null;
+        if (post.restaurant_id) {
+          const { data: restaurant } = await supabase
+            .from("restaurants")
+            .select("id, restaurant_name, ubicacion")
+            .eq("id", post.restaurant_id)
+            .single();
+          restaurantData = restaurant;
+        }
 
         const { count: likesCount } = await supabase
           .from("likes")
@@ -139,6 +150,7 @@ export async function getSavedPosts(req, res) {
         return {
           ...post,
           users: user,
+          restaurant: restaurantData,
           likes: [{ count: likesCount || 0 }],
           comments: [{ count: commentsCount || 0 }],
         };

@@ -37,6 +37,7 @@ app.use(express.json());
 // ============================
 // ARCHIVOS ESTÁTICOS
 // ============================
+app.use("/public", express.static(path.join(__dirname, "public")));
 app.use("/app1", express.static(path.join(__dirname, "app1")));
 app.use("/app2", express.static(path.join(__dirname, "app2")));
 
@@ -65,15 +66,21 @@ app.get("/api/test-db", async (req, res) => {
 });
 
 // ============================
-// RUTA BASE
+// RUTA BASE - Landing Page
 // ============================
 app.get("/", (req, res) => {
-  res.send("🚀 Servidor funcionando correctamente");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // ============================
 // INICIAR SERVIDOR
 // ============================
-app.listen(PORT, () => {
-  console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
-});
+// Para desarrollo local
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
+  });
+}
+
+// Para Vercel (serverless)
+export default app;

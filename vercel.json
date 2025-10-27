@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "app1/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "app2/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/public/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/app1/(.*)",
+      "dest": "/app1/$1"
+    },
+    {
+      "src": "/app2/(.*)",
+      "dest": "/app2/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.js"
+    }
+  ]
+}
+

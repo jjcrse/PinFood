@@ -844,3 +844,310 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+
+/* MODAL DE SELECCIÓN DE IMAGEN */
+.image-source-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.image-source-modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.image-source-modal-content h3 {
+  color: #333;
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 1.5em;
+}
+
+.image-source-modal-content button {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-camera {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-camera:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-gallery {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.btn-gallery:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+}
+
+.btn-cancel {
+  background: #e0e0e0;
+  color: #666;
+}
+
+.btn-cancel:hover {
+  background: #d0d0d0;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* MODAL DE CÁMARA CON PREVIEW EN VIVO */
+.camera-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  animation: fadeIn 0.3s ease;
+}
+
+.camera-modal-content {
+  background: #1a1a1a;
+  border-radius: 20px;
+  padding: 20px;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: slideUp 0.3s ease;
+}
+
+.camera-modal-content h3 {
+  color: white;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#camera-preview {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 15px;
+  background: #000;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.camera-controls {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.btn-capture {
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-capture:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn-cancel-camera {
+  padding: 15px 30px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel-camera:hover {
+  background: #c0392b;
+  transform: translateY(-3px);
+}
+
+.camera-hint {
+  color: #999;
+  font-size: 0.9em;
+  text-align: center;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .camera-modal-content {
+    width: 95vw;
+    padding: 15px;
+  }
+  
+  .camera-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-capture,
+  .btn-cancel-camera {
+    width: 100%;
+  }
+}
+
+/* SELECTOR DE IMAGEN Y PREVIEW */
+.profile-picture-selector {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.profile-picture-selector label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.image-preview {
+  width: 150px;
+  height: 150px;
+  margin: 15px auto;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #667eea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-preview .no-image {
+  color: #999;
+  font-size: 0.9em;
+}
+
+.image-preview .loading {
+  color: #667eea;
+  font-size: 0.9em;
+  text-align: center;
+  animation: pulse 1.5s infinite;
+}
+
+.btn-select-image {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.btn-select-image:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* PREVIEW DE IMAGEN DE POST */
+.post-image-selector {
+  margin: 15px 0;
+}
+
+.post-image-preview {
+  position: relative;
+  margin: 15px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.post-image-preview img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.btn-remove-image {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 8px 12px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-remove-image:hover {
+  background: rgba(255, 0, 0, 1);
+  transform: scale(1.05);
+}

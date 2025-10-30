@@ -1,3 +1,6 @@
+// 📤 Importar utilidades de upload de imágenes
+import { showImageSourceModal, uploadImageToSupabase } from './utils/imageUpload.js';
+
 const API_URL = "http://localhost:3000/api/auth";
 const FEED_API_URL = "http://localhost:3000/api/feed";
 const msg = document.getElementById("msg");
@@ -173,6 +176,9 @@ document.getElementById("post-form").addEventListener("submit", async (e) => {
       document.getElementById("post-content").value = "";
       document.getElementById("post-image").value = "";
       document.getElementById("post-restaurant").value = "";
+      document.getElementById("post-image-preview").style.display = "none";
+      document.getElementById("post-image-preview").innerHTML = "";
+      document.getElementById("select-post-image-btn").textContent = "📸 Agregar Imagen (opcional)";
       cargarFeed();
     } else {
       console.error("❌ Error al crear publicación:", data);
@@ -183,6 +189,60 @@ document.getElementById("post-form").addEventListener("submit", async (e) => {
     alert("Error al crear publicación.");
   }
 });
+
+// 📸 Event listener para seleccionar imagen en posts
+document.getElementById("select-post-image-btn").addEventListener("click", async () => {
+  try {
+    // Mostrar modal para elegir cámara o galería
+    const base64Image = await showImageSourceModal();
+    
+    // Mostrar loading en el botón
+    const btn = document.getElementById("select-post-image-btn");
+    const originalText = btn.textContent;
+    btn.textContent = "⏳ Subiendo...";
+    btn.disabled = true;
+
+    // Subir imagen a Supabase
+    const session = JSON.parse(localStorage.getItem("session"));
+    const imageUrl = await uploadImageToSupabase(base64Image, 'post', session.access_token);
+
+    // Mostrar preview
+    const preview = document.getElementById("post-image-preview");
+    preview.innerHTML = `
+      <img src="${imageUrl}" alt="Preview" />
+      <button type="button" class="btn-remove-image" onclick="removePostImage()">❌ Quitar</button>
+    `;
+    preview.style.display = "block";
+    
+    // Guardar URL en el input hidden
+    document.getElementById("post-image").value = imageUrl;
+
+    // Restaurar botón
+    btn.textContent = "✅ Imagen agregada";
+    btn.disabled = false;
+
+    console.log("✅ Imagen de post subida:", imageUrl);
+    
+  } catch (err) {
+    // Restaurar botón
+    const btn = document.getElementById("select-post-image-btn");
+    btn.textContent = "📸 Agregar Imagen (opcional)";
+    btn.disabled = false;
+
+    if (err.message !== 'Cancelled') {
+      console.error("❌ Error al seleccionar imagen:", err);
+      alert("Error al subir imagen: " + err.message);
+    }
+  }
+});
+
+// Función para quitar imagen del post
+window.removePostImage = function() {
+  document.getElementById("post-image").value = "";
+  document.getElementById("post-image-preview").style.display = "none";
+  document.getElementById("post-image-preview").innerHTML = "";
+  document.getElementById("select-post-image-btn").textContent = "📸 Agregar Imagen (opcional)";
+};
 
 // 📰 CARGAR FEED
 async function cargarFeed() {
@@ -589,7 +649,22 @@ async function cargarMiPerfil() {
           <h3>Editar Perfil</h3>
           <input type="text" id="edit-name" placeholder="Nombre completo" value="${user.full_name || ""}" />
           <textarea id="edit-description" placeholder="Descripción" rows="3">${user.description || ""}</textarea>
-          <input type="url" id="edit-picture-url" placeholder="URL de foto de perfil" value="${user.profile_picture_url || ""}" />
+          
+          <!-- Selector de foto de perfil -->
+          <div class="profile-picture-selector">
+            <label>Foto de Perfil:</label>
+            <div id="profile-preview" class="image-preview">
+              ${user.profile_picture_url 
+                ? `<img src="${user.profile_picture_url}" alt="Preview" />` 
+                : '<div class="no-image">Sin imagen</div>'
+              }
+            </div>
+            <button type="button" id="select-profile-picture-btn" class="btn-select-image">
+              📸 Seleccionar Imagen
+            </button>
+            <input type="hidden" id="edit-picture-url" value="${user.profile_picture_url || ""}" />
+          </div>
+
           <div style="display: flex; gap: 10px;">
             <button id="save-profile-btn" class="btn-primary">💾 Guardar</button>
             <button id="cancel-edit-btn" class="btn-secondary">❌ Cancelar</button>
@@ -642,6 +717,36 @@ async function cargarMiPerfil() {
 
     document.getElementById("save-profile-btn").addEventListener("click", async () => {
       await guardarPerfil(user.id);
+    });
+
+    // 📸 Event listener para seleccionar foto de perfil
+    document.getElementById("select-profile-picture-btn").addEventListener("click", async () => {
+      try {
+        // Mostrar modal para elegir cámara o galería
+        const base64Image = await showImageSourceModal();
+        
+        // Mostrar loading
+        const preview = document.getElementById("profile-preview");
+        preview.innerHTML = '<div class="loading">Subiendo imagen...</div>';
+
+        // Subir imagen a Supabase
+        const session = JSON.parse(localStorage.getItem("session"));
+        const imageUrl = await uploadImageToSupabase(base64Image, 'profile', session.access_token);
+
+        // Actualizar preview
+        preview.innerHTML = `<img src="${imageUrl}" alt="Preview" />`;
+        
+        // Guardar URL en el input hidden
+        document.getElementById("edit-picture-url").value = imageUrl;
+
+        console.log("✅ Imagen subida exitosamente:", imageUrl);
+        
+      } catch (err) {
+        if (err.message !== 'Cancelled') {
+          console.error("❌ Error al seleccionar imagen:", err);
+          alert("Error al subir imagen: " + err.message);
+        }
+      }
     });
 
     // Cargar posts guardados

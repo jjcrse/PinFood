@@ -103,11 +103,16 @@
             rows="4" 
             required
           ></textarea>
-          <input 
-            type="url" 
-            id="post-image" 
-            placeholder="URL de la imagen (opcional)"
-          />
+          
+          <!-- Selector de imagen del post -->
+          <div class="post-image-selector">
+            <div id="post-image-preview" class="post-image-preview" style="display: none;"></div>
+            <button type="button" id="select-post-image-btn" class="btn-select-image">
+              📸 Agregar Imagen (opcional)
+            </button>
+            <input type="hidden" id="post-image" value="" />
+          </div>
+
           <select id="post-restaurant">
             <option value="">🍽️ Etiquetar un restaurante (opcional)</option>
           </select>
@@ -122,6 +127,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

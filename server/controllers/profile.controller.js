@@ -19,7 +19,7 @@ export async function getUserProfile(req, res) {
     // Obtener posts del usuario (sin relaciones complejas)
     const { data: posts, error: postsError } = await supabase
       .from("posts")
-      .select("id, content, image_url, created_at, restaurant_id")
+      .select("id, content, image_url, created_at, restaurant_id, location_lat, location_lng, location_name")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 

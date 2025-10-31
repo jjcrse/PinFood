@@ -1,5 +1,5 @@
 import express from "express";
-import { registerRestaurant, loginRestaurant, searchRestaurants, getRestaurantPosts } from "../controllers/restaurant.controller.js";
+import { registerRestaurant, loginRestaurant, searchRestaurants, getRestaurantPosts, updateRestaurantProfile } from "../controllers/restaurant.controller.js";
 
 const router = express.Router();
 
@@ -14,6 +14,9 @@ router.post("/register", registerRestaurant);
 
 // 🔐 POST /api/restaurants/login
 router.post("/login", loginRestaurant);
+
+// ✏️ PUT /api/restaurants/:restaurantId - Actualizar perfil del restaurante
+router.put("/:restaurantId", updateRestaurantProfile);
 
 export default router;
 

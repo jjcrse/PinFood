@@ -1,5 +1,13 @@
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 import { supabase } from "../services/supabaseClient.js";
 import bcrypt from "bcrypt";
+
+dotenv.config();
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // 📝 REGISTRAR RESTAURANTE
 export async function registerRestaurant(req, res) {
@@ -58,6 +66,7 @@ export async function registerRestaurant(req, res) {
 export async function searchRestaurants(req, res) {
   try {
     const { query } = req.query;
+    console.log("🔍 Buscando restaurantes... Query:", query || "(sin filtro)");
 
     let restaurantsQuery = supabase
       .from("restaurants")
@@ -72,15 +81,32 @@ export async function searchRestaurants(req, res) {
       .order("restaurant_name", { ascending: true })
       .limit(20);
 
-    if (error) throw error;
+    if (error) {
+      console.error("❌ Error de Supabase al buscar restaurantes:", error);
+      console.error("❌ Error details:", JSON.stringify(error, null, 2));
+      return res.status(500).json({ 
+        error: "Error al buscar restaurantes",
+        details: error.message,
+        hint: "Verifica que las políticas RLS permitan lectura pública de la tabla restaurants"
+      });
+    }
+
+    console.log(`✅ Restaurantes encontrados: ${restaurants?.length || 0}`);
+    if (restaurants && restaurants.length > 0) {
+      console.log("📋 Primeros restaurantes:", restaurants.slice(0, 3).map(r => r.restaurant_name));
+    }
 
     res.status(200).json({
       restaurants: restaurants || [],
       count: restaurants?.length || 0,
     });
   } catch (err) {
-    console.error("❌ Error al buscar restaurantes:", err);
-    res.status(500).json({ error: "Error al buscar restaurantes" });
+    console.error("❌ Error general al buscar restaurantes:", err);
+    console.error("❌ Stack:", err.stack);
+    res.status(500).json({ 
+      error: "Error al buscar restaurantes",
+      details: err.message 
+    });
   }
 }
 
@@ -187,6 +213,56 @@ export async function getRestaurantPosts(req, res) {
   } catch (err) {
     console.error("❌ Error al obtener posts del restaurante:", err);
     res.status(500).json({ error: "Error al obtener posts del restaurante" });
+  }
+}
+
+// ✏️ ACTUALIZAR PERFIL DEL RESTAURANTE
+export async function updateRestaurantProfile(req, res) {
+  try {
+    const { restaurantId } = req.params;
+    const { restaurant_name, descripcion, ubicacion, profile_picture_url } = req.body;
+
+    console.log("✏️ Actualizando perfil del restaurante:", restaurantId);
+
+    // Usar SERVICE_ROLE_KEY si está disponible para evitar problemas de RLS
+    let supabaseClient = supabase;
+    if (supabaseServiceKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    }
+
+    // Construir objeto de actualización dinámicamente
+    const updateData = {};
+    if (restaurant_name) updateData.restaurant_name = restaurant_name;
+    if (descripcion !== undefined) updateData.descripcion = descripcion;
+    if (ubicacion !== undefined) updateData.ubicacion = ubicacion;
+    if (profile_picture_url !== undefined) updateData.profile_picture_url = profile_picture_url;
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: "No se proporcionaron datos para actualizar" });
+    }
+
+    const { data, error } = await supabaseClient
+      .from("restaurants")
+      .update(updateData)
+      .eq("id", restaurantId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("❌ Error al actualizar restaurante:", error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    // No devolver la contraseña
+    const { password: _, ...restaurantData } = data;
+
+    res.status(200).json({
+      message: "✅ Perfil actualizado exitosamente",
+      restaurant: restaurantData,
+    });
+  } catch (err) {
+    console.error("❌ Error general al actualizar perfil:", err);
+    res.status(500).json({ error: "Error al actualizar perfil" });
   }
 }
 

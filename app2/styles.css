@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -5,24 +7,25 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+  font-family: 'Nunito', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(180deg, #FFF6E9 0%, #f5e6d3 100%);
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
+  width: 100vw;
+  max-width: 100vw;
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 .container {
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  max-width: 600px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  max-height: 90vh;
-  overflow-y: auto;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  max-width: 100vw;
+  width: 100vw;
+  box-shadow: none;
+  min-height: 100vh;
+  margin: 0;
 }
 
 h1 {
@@ -45,56 +48,54 @@ h2 {
   font-weight: 500;
 }
 
-/* SECCIÓN DE AUTENTICACIÓN */
-#auth-section {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+/* HERO + CARD (glass) */
+.auth-hero { width: min(980px, 100%); display: grid; place-items: center; }
+.auth-card {
+  width: min(520px, 92vw);
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.35);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  padding: 16px 20px; /* aún más compacto */
+  border-radius: 22px;
+  display: grid; /* organiza verticalmente */
+  gap: 12px;     /* separaciones consistentes */
 }
 
-.auth-form {
-  background: #f8f9fa;
-  padding: 25px;
-  border-radius: 15px;
-}
-
-.auth-form h2 {
-  color: #ff6b6b;
-  margin-bottom: 20px;
+.auth-header {
   text-align: center;
+  margin-bottom: 4px; /* más corto */
+  color: #fff3e6; /* Color crema */
 }
+.auth-header h2 { font-weight: 500; opacity: 1; color: #fff3e6; margin-bottom: 2px; }
+.auth-header h1 { font-weight: 800; letter-spacing: .5px; color: #fff3e6; line-height: 1.1; }
 
-.auth-form input {
-  width: 100%;
-  padding: 12px 15px;
-  margin-bottom: 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
-  transition: border-color 0.3s;
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 6px; }
+.auth-tab {
+  padding: 12px 14px; border-radius: 999px; border: 1px solid #ffd7b8;
+  background: #fff3e6; color: #ff6a3d; font-weight: 700; cursor: pointer; transition: all .2s ease;
 }
+.auth-tab-active { background: #fff; color: #ff6a3d; border-color: #ffd7b8; }
 
-.auth-form input:focus {
-  outline: none;
-  border-color: #ff6b6b;
-}
-
-.auth-form button {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
+.auth-msg {
+  min-height: 0; /* no reservar espacio */
+  text-align: center;
+  color: #fff;
   font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s;
+  margin: 0; /* sin márgenes extra */
 }
+.auth-msg:empty { display: none; } /* oculta el espacio cuando no hay mensaje */
 
-.auth-form button:hover {
-  transform: translateY(-2px);
-}
+.auth-form.fancy { display: grid; gap: 10px; }
+.auth-form.fancy input { width:100%; height:44px; border-radius:999px; border:1px solid #ffe3cc; background:#fff; padding:0 14px; margin:0; outline:none; font-size:15px }
+
+.btn-primary.wide { width:100%; margin-top:4px; padding:12px; border-radius:999px; background:#fff3e6; color:#ff6a3d; border:1px solid #ffd7b8; font-weight:800; letter-spacing:.3px; cursor:pointer; transition: transform .15s ease, box-shadow .2s ease; display:flex; align-items:center; justify-content:center }
+.btn-primary.wide:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,106,61,.28) }
+
+.auth-social { display:flex; gap:12px; justify-content:center; align-items:center; margin:8px 0 4px }
+.auth-social .dot { color:#fff; opacity:.9 }
+.auth-footer-link { color:#fff; opacity:.9; text-align:center; font-weight:500 }
 
 /* SECCIÓN DE BIENVENIDA */
 #welcome-section {
@@ -127,22 +128,43 @@ h2 {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
-  color: white;
+  display: block;
+  margin: 30px auto;
+  max-width: 600px;
+  width: 100%;
+  padding: 16px 30px;
+  background: #fff3e6;
+  color: #FF5A00;
+  border: 1px solid #ffd7b8;
+  border-radius: 20px;
+  font-size: 1.1em;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: rgba(255, 90, 0, 0.2) 0px 4px 10px;
+  font-family: 'Nunito', 'Poppins', sans-serif;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+  box-shadow: rgba(255, 90, 0, 0.3) 0px 6px 15px;
+  background: #fff8f0;
 }
 
 .btn-secondary {
   background: #e0e0e0;
   color: #333;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .btn-secondary:hover {
   background: #d0d0d0;
+  transform: translateY(-1px);
 }
 
 /* SCROLLBAR */
@@ -164,9 +186,112 @@ h2 {
   background: #ffa500;
 }
 
-/* PERFIL DEL RESTAURANTE */
-#profile-section {
-  animation: fadeIn 0.5s;
+/* PERFIL DEL RESTAURANTE - ESTILO MODERNO */
+.restaurant-profile-container {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #FFF6E9 0%, #f5e6d3 100%);
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+#restaurant-profile-content {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  font-family: 'Nunito', 'Poppins', sans-serif;
+  padding: 0 20px;
+}
+
+.profile-header-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 20px auto;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 30px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 90, 0, 0.1);
+}
+
+.profile-header-card:hover {
+  transform: translateY(-5px);
+  box-shadow: rgba(255, 90, 0, 0.2) 0px 15px 40px;
+}
+
+.profile-picture {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 5px solid #FF5A00;
+  box-shadow: rgba(255, 90, 0, 0.3) 0px 8px 20px;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+.profile-picture:hover {
+  transform: scale(1.05);
+}
+
+.profile-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FF5A00 0%, #ff8660 100%);
+  font-size: 4em;
+  color: white;
+}
+
+.profile-info {
+  width: 100%;
+}
+
+.profile-info h3 {
+  color: #FF5A00;
+  font-size: 1.8em;
+  font-weight: 800;
+  margin-bottom: 10px;
+  font-family: 'Nunito', 'Poppins', sans-serif;
+}
+
+.profile-email {
+  color: #666;
+  font-size: 1em;
+  margin-bottom: 8px;
+}
+
+.profile-description {
+  color: #555;
+  font-size: 1em;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.profile-location {
+  color: #666;
+  font-size: 0.95em;
+  margin-bottom: 8px;
+}
+
+.profile-stats {
+  color: #888;
+  font-size: 0.9em;
+  margin-top: 10px;
 }
 
 @keyframes fadeIn {
@@ -174,64 +299,9 @@ h2 {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.profile-card {
-  background: #f8f9fa;
-  border-radius: 15px;
-  padding: 30px;
-  margin-top: 20px;
-}
-
-.profile-header {
-  text-align: center;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #e0e0e0;
-  margin-bottom: 25px;
-}
-
-.profile-icon {
-  font-size: 4em;
-  margin-bottom: 15px;
-}
-
-.profile-header h2 {
-  color: #ff6b6b;
-  margin: 0;
-  font-size: 2em;
-}
-
-.profile-info {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  background: white;
-  border-radius: 10px;
-  border-left: 4px solid #ff6b6b;
-}
-
-.info-label {
-  font-weight: 600;
-  color: #555;
-  font-size: 1.05em;
-}
-
-.info-value {
-  color: #333;
-  font-size: 1.05em;
-}
-
-.profile-actions {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 20px;
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* RESPONSIVE */
@@ -268,28 +338,153 @@ h2 {
   }
 }
 
-/* SECCIÓN DE PUBLICACIONES */
-.posts-section {
-  margin-top: 40px;
+/* FORMULARIO DE EDICIÓN */
+.edit-profile-form {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 30px;
+  border-radius: 25px;
+  margin: 30px auto;
+  max-width: 600px;
+  width: 100%;
+  animation: slideDown 0.3s;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 30px;
+  border: 1px solid rgba(255, 90, 0, 0.1);
 }
 
-.posts-section h2 {
-  color: #ff6b6b;
-  margin-bottom: 10px;
-  font-size: 1.8em;
+.edit-profile-form h3 {
+  color: #FF5A00;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  font-weight: 700;
+  text-align: center;
+  font-family: 'Nunito', 'Poppins', sans-serif;
 }
 
-.posts-subtitle {
-  color: #666;
-  margin-bottom: 25px;
+.edit-profile-form input,
+.edit-profile-form textarea {
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  font-size: 16px;
+  font-family: 'Nunito', 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  background: white;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 8px;
+}
+
+.edit-profile-form input:focus,
+.edit-profile-form textarea:focus {
+  outline: none;
+  border-color: #FF5A00;
+  box-shadow: 0 0 0 3px rgba(255, 90, 0, 0.1);
+}
+
+.edit-profile-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Selector de imagen de perfil */
+.profile-picture-selector {
+  margin: 25px 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profile-picture-selector label {
+  display: block;
+  font-weight: 700;
+  color: #FF5A00;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+  font-family: 'Nunito', 'Poppins', sans-serif;
+}
+
+.image-preview {
+  width: 150px;
+  height: 150px;
+  margin: 15px auto;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #FF5A00;
+  box-shadow: rgba(255, 90, 0, 0.2) 0px 4px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-preview .no-image {
+  color: #999;
+  font-size: 0.9em;
+}
+
+.image-preview .loading {
+  color: #FF5A00;
+  font-weight: 600;
+}
+
+.btn-select-image {
+  width: 100%;
+  max-width: 400px;
+  padding: 14px 20px;
+  background: #fff3e6;
+  color: #FF5A00;
+  border: 1px solid #ffd7b8;
+  border-radius: 15px;
   font-size: 1em;
-  line-height: 1.5;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: rgba(255, 90, 0, 0.15) 0px 4px 10px;
+  font-family: 'Nunito', 'Poppins', sans-serif;
+  margin-top: 15px;
 }
 
-.posts-container {
+.btn-select-image:hover {
+  transform: translateY(-2px);
+  box-shadow: rgba(255, 90, 0, 0.25) 0px 6px 15px;
+  background: #fff8f0;
+}
+
+#save-restaurant-profile-btn,
+#cancel-edit-restaurant-btn {
+  max-width: 300px;
+  margin: 10px auto;
+  display: block;
+}
+
+/* SECCIÓN DE PUBLICACIONES */
+.feed-container {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 20px 0;
+}
+
+#restaurant-profile-content h3 {
+  color: #FF5A00;
+  font-size: 1.5em;
+  font-weight: 700;
+  margin: 40px auto 20px;
+  text-align: center;
+  font-family: 'Nunito', 'Poppins', sans-serif;
 }
 
 .posts-count {
@@ -336,16 +531,17 @@ h2 {
 
 /* POST CARDS */
 .post-card {
-  background: white;
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
   padding: 25px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
   transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(255, 90, 0, 0.1);
 }
 
 .post-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: rgba(255, 90, 0, 0.2) 0px 8px 20px;
 }
 
 .post-header {
@@ -363,19 +559,19 @@ h2 {
   height: 45px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #ff6b6b;
+  border: 2px solid #FF5A00;
 }
 
 .user-avatar-placeholder {
   width: 45px;
   height: 45px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF5A00 0%, #ff8660 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5em;
-  border: 2px solid #ff6b6b;
+  border: 2px solid #FF5A00;
 }
 
 .post-user-info {

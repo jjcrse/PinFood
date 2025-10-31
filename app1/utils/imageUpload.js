@@ -176,6 +176,49 @@ export async function uploadImageToSupabase(base64Image, type, token) {
     const data = await res.json();
     console.log('📦 Datos recibidos:', data);
 
+    // Si el token está expirado, intentar refrescarlo y reintentar
+    if (!res.ok && data.error && (data.error.includes('expired') || data.error.includes('token is expired') || data.error.includes('invalid JWT'))) {
+      console.warn('⚠️ Token expirado detectado, intentando refrescar...');
+      
+      // Intentar refrescar el token
+      const refreshed = await refrescarTokenSiExpirado();
+      
+      if (refreshed) {
+        console.log('✅ Token refrescado, reintentando upload...');
+        // Obtener el nuevo token
+        const sessionData = localStorage.getItem("session");
+        const session = JSON.parse(sessionData);
+        const newToken = session.access_token || (session.session && session.session.access_token);
+        
+        if (newToken) {
+          // Reintentar con el nuevo token
+          const retryRes = await fetch('http://localhost:3000/api/uploads/base64', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${newToken}`,
+            },
+            body: JSON.stringify({
+              image: base64Image,
+              type: type,
+            }),
+          });
+          
+          const retryData = await retryRes.json();
+          
+          if (retryRes.ok) {
+            console.log('✅ Imagen subida correctamente después de refrescar token:', retryData.url);
+            return retryData.url;
+          } else {
+            throw new Error(retryData.error || 'Error al subir imagen después de refrescar token');
+          }
+        }
+      }
+      
+      // Si no se pudo refrescar, lanzar error para que el usuario pueda iniciar sesión nuevamente
+      throw new Error('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
+    }
+
     if (!res.ok) {
       throw new Error(data.error || 'Error al subir imagen');
     }
@@ -185,6 +228,53 @@ export async function uploadImageToSupabase(base64Image, type, token) {
   } catch (err) {
     console.error('❌ Error al subir imagen:', err);
     throw err;
+  }
+}
+
+// Función auxiliar para refrescar el token si está expirado
+async function refrescarTokenSiExpirado() {
+  try {
+    const sessionData = localStorage.getItem("session");
+    if (!sessionData) {
+      return false;
+    }
+    
+    const session = JSON.parse(sessionData);
+    const refreshToken = session.refresh_token || (session.session && session.session.refresh_token);
+    
+    if (!refreshToken) {
+      console.warn("⚠️ No hay refresh_token disponible");
+      return false;
+    }
+    
+    console.log("🔄 Intentando refrescar token usando el backend...");
+    
+    // Intentar refrescar usando nuestro backend
+    const refreshRes = await fetch('http://localhost:3000/api/auth/refresh', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+    
+    if (refreshRes.ok) {
+      const refreshData = await refreshRes.json();
+      if (refreshData.session && refreshData.session.access_token) {
+        // Actualizar la sesión en localStorage
+        localStorage.setItem("session", JSON.stringify(refreshData.session));
+        console.log("✅ Token refrescado exitosamente");
+        return true;
+      }
+    } else {
+      const errorData = await refreshRes.json().catch(() => ({}));
+      console.error("❌ Error al refrescar token:", errorData.error || 'Error desconocido');
+    }
+    
+    return false;
+  } catch (err) {
+    console.error("❌ Error al refrescar token:", err);
+    return false;
   }
 }
 

@@ -4,7 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>App de Comida</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
   <div class="container">
@@ -12,23 +19,26 @@
     <p id="msg"></p>
 
     <!-- SECCIÓN DE AUTENTICACIÓN -->
-    <div id="auth-section">
-      <div class="auth-form">
-        <h2>Registro</h2>
-        <form id="register-form">
+    <div id="auth-section" class="auth-hero">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Welcome to</h2>
+          <h1>PinFood</h1>
+        </div>
+        <div class="auth-tabs">
+          <button class="auth-tab auth-tab-active" id="tab-register-user">SignUp</button>
+          <button class="auth-tab" id="tab-login-user">Login</button>
+        </div>
+        <form id="register-form" class="auth-form fancy">
           <input type="text" id="reg-name" placeholder="Nombre completo" required />
           <input type="email" id="reg-email" placeholder="Correo electrónico" required />
           <input type="password" id="reg-pass" placeholder="Contraseña" required />
-          <button type="submit">Registrarse</button>
+          <button type="submit" class="btn-primary wide">Create account</button>
         </form>
-      </div>
-
-      <div class="auth-form">
-        <h2>Iniciar Sesión</h2>
-        <form id="login-form">
+        <form id="login-form" class="auth-form fancy" style="display:none;">
           <input type="email" id="login-email" placeholder="Correo electrónico" required />
           <input type="password" id="login-pass" placeholder="Contraseña" required />
-          <button type="submit">Entrar</button>
+          <button type="submit" class="btn-primary wide">Login</button>
         </form>
       </div>
     </div>
@@ -47,12 +57,28 @@
     <div id="my-profile-section" style="display: none;">
       <div class="feed-header">
         <h2>👤 Mi Perfil</h2>
-        <button id="back-from-my-profile" class="btn-secondary">← Volver</button>
+        <button id="logout-btn-navbar" class="btn-secondary">Cerrar Sesión</button>
       </div>
       
       <div id="my-profile-content">
         <p>Cargando perfil...</p>
       </div>
+
+      <!-- NAVBAR INFERIOR -->
+      <nav class="bottom-navbar">
+        <button class="nav-item" id="nav-create-post-3" title="Crear Post">
+          <span class="nav-icon">➕</span>
+          <span class="nav-label">Crear</span>
+        </button>
+        <button class="nav-item" id="nav-home-3" title="Home">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item active" id="nav-profile-3" title="Perfil">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">Perfil</span>
+        </button>
+      </nav>
     </div>
 
     <!-- SECCIÓN DE PERFIL DE OTRO USUARIO -->
@@ -69,61 +95,137 @@
 
     <!-- SECCIÓN DEL FEED -->
     <div id="feed-section" style="display: none;">
-      <div class="feed-header">
-        <h2>📰 Feed de Publicaciones</h2>
-        <button id="back-to-welcome" class="btn-secondary">← Volver</button>
-      </div>
-
-      <!-- BUSCADOR DE RESTAURANTES (COLAPSABLE) -->
-      <div class="search-restaurants-wrapper">
-        <button id="toggle-restaurants-btn" class="toggle-restaurants-btn">
-          🍽️ Explorar Restaurantes
-          <span id="toggle-icon">▼</span>
-        </button>
-        
-        <div id="search-restaurants-section" class="search-restaurants collapsed">
-          <div class="search-box">
-            <input 
-              type="text" 
-              id="search-restaurant-input" 
-              placeholder="Busca restaurantes por nombre..."
-            />
-          </div>
-          <div id="restaurants-results" class="restaurants-results"></div>
+      <!-- HEADER CON LOGO Y BÚSQUEDA -->
+      <div class="feed-top-header">
+        <h1 class="feed-logo">🍕 PinFood</h1>
+        <div class="feed-search-bar">
+          <input 
+            type="text" 
+            id="search-restaurant-input" 
+            placeholder="Buscar restaurantes..." 
+            class="search-input"
+          />
         </div>
       </div>
 
-      <!-- FORMULARIO PARA CREAR PUBLICACIÓN -->
-      <div class="create-post">
-        <h3>✍️ Crear una publicación</h3>
-        <form id="post-form">
-          <textarea 
-            id="post-content" 
-            placeholder="¿Qué estás comiendo hoy?" 
-            rows="4" 
-            required
-          ></textarea>
-          
-          <!-- Selector de imagen del post -->
-          <div class="post-image-selector">
-            <div id="post-image-preview" class="post-image-preview" style="display: none;"></div>
-            <button type="button" id="select-post-image-btn" class="btn-select-image">
-              📸 Agregar Imagen (opcional)
-            </button>
-            <input type="hidden" id="post-image" value="" />
-          </div>
+      <!-- FILTROS/CATEGORÍAS -->
+      <div class="feed-filters">
+        <button class="filter-chip active" data-filter="food">
+          🍔 food
+        </button>
+        <button class="filter-chip" data-filter="maps">
+          📍 maps
+        </button>
+        <button class="filter-chip" data-filter="posts">
+          💬 posts
+        </button>
+      </div>
 
-          <select id="post-restaurant">
-            <option value="">🍽️ Etiquetar un restaurante (opcional)</option>
-          </select>
-          <button type="submit" class="btn-primary">Publicar</button>
-        </form>
+      <!-- SECCIÓN DE MAPA (OCULTA POR DEFECTO) -->
+      <div id="map-view-section" class="map-view-section" style="display: none;">
+        <div id="feed-map" class="feed-map"></div>
+      </div>
+
+      <!-- BUSCADOR DE RESTAURANTES (COLAPSABLE) - Solo para categoría "food" -->
+      <div id="restaurants-explore-section" class="restaurants-explore-section" style="display: none;">
+        <div id="restaurants-results" class="restaurants-results"></div>
       </div>
 
       <!-- CONTENEDOR DE PUBLICACIONES -->
       <div id="feed-container" class="feed-container">
         <p>Cargando publicaciones...</p>
       </div>
+
+      <!-- NAVBAR INFERIOR -->
+      <nav class="bottom-navbar">
+        <button class="nav-item" id="nav-create-post" title="Crear Post">
+          <span class="nav-icon">➕</span>
+          <span class="nav-label">Crear</span>
+        </button>
+        <button class="nav-item active" id="nav-home" title="Home">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" id="nav-profile" title="Perfil">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">Perfil</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- SECCIÓN DE CREAR POST (EXCLUSIVA) -->
+    <div id="create-post-section" style="display: none;">
+      <div class="create-post-header">
+        <h2>✍️ Crear Publicación</h2>
+        <button id="back-from-create-post" class="btn-back">← Volver</button>
+      </div>
+      
+      <div class="create-post-content">
+        <form id="create-post-form-exclusive">
+          <textarea 
+            id="create-post-content" 
+            placeholder="¿Qué estás comiendo hoy?" 
+            rows="6"
+            required
+          ></textarea>
+          
+          <!-- Selector de imagen del post -->
+          <div class="post-image-selector">
+            <div id="create-post-image-preview" class="post-image-preview" style="display: none;"></div>
+            <button type="button" id="create-select-post-image-btn" class="btn-select-image">
+              📸 Agregar Imagen (opcional)
+            </button>
+            <input type="hidden" id="create-post-image" value="" />
+          </div>
+
+          <!-- Selector de ubicación del post -->
+          <div class="post-location-selector">
+            <div id="create-post-location-chip" class="post-location-chip" style="display: none;"></div>
+            <button type="button" id="create-select-post-location-btn" class="btn-select-image">
+              📍 Agregar ubicación (opcional)
+            </button>
+            <input type="hidden" id="create-post-location-lat" />
+            <input type="hidden" id="create-post-location-lng" />
+            <input type="hidden" id="create-post-location-name" />
+          </div>
+
+          <select id="create-post-restaurant">
+            <option value="">🍽️ Etiquetar un restaurante (opcional)</option>
+          </select>
+          
+          <button type="submit" class="btn-primary-create">Publicar</button>
+        </form>
+      </div>
+
+      <!-- NAVBAR INFERIOR -->
+      <nav class="bottom-navbar">
+        <button class="nav-item active" id="nav-create-post-2" title="Crear Post">
+          <span class="nav-icon">➕</span>
+          <span class="nav-label">Crear</span>
+        </button>
+        <button class="nav-item" id="nav-home-2" title="Home">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" id="nav-profile-2" title="Perfil">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">Perfil</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Modal del mapa para seleccionar ubicación -->
+  <div id="map-modal" class="map-modal" style="display: none;">
+    <div class="map-modal-content">
+      <h3>📍 Selecciona la ubicación</h3>
+      <div id="leaflet-map" class="leaflet-map"></div>
+      <div class="map-actions">
+        <input type="text" id="location-search" placeholder="Buscar dirección opcional" class="map-search" />
+        <button id="confirm-location" class="btn-primary" type="button">✔️ Confirmar</button>
+        <button id="cancel-location" class="btn-secondary" type="button">Cancelar</button>
+      </div>
+      <p class="map-hint">Toca en el mapa para colocar el marcador. Usaremos tu ubicación actual si das permiso.</p>
     </div>
   </div>
 

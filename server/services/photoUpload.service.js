@@ -1,7 +1,14 @@
-import { supabase } from './supabaseClient.js';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 // Upload desde multer (buffer)
 export async function uploadPhoto(file, bucket = 'uploads') {
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
   const fileName = `${Date.now()}-${file.originalname}`;
   const { data, error } = await supabase.storage.from(bucket).upload(fileName, file.buffer);
 
@@ -11,8 +18,8 @@ export async function uploadPhoto(file, bucket = 'uploads') {
   return publicUrl.publicUrl;
 }
 
-// Upload desde base64 (frontend)
-export async function uploadPhotoBase64(base64String, userId, type = 'general') {
+// Upload desde base64 (frontend) - CON AUTENTICACIÓN
+export async function uploadPhotoBase64(base64String, userId, type = 'general', userToken = null) {
   try {
     console.log('📸 Iniciando uploadPhotoBase64...');
     console.log('👤 User ID:', userId);
@@ -39,16 +46,44 @@ export async function uploadPhotoBase64(base64String, userId, type = 'general') 
     const fileName = `${type}/${userId}/${Date.now()}.${imageType}`;
     console.log('📝 Nombre del archivo:', fileName);
     
-    // Verificar que Supabase esté configurado
-    if (!supabase || !supabase.storage) {
-      console.error('❌ Supabase no está configurado correctamente');
-      throw new Error('Error de configuración del servidor');
+    // Crear cliente de Supabase autenticado con el token del usuario
+    // Esto es necesario para que las políticas RLS funcionen correctamente
+    let supabaseClient;
+    if (userToken) {
+      // Crear cliente autenticado con el token del usuario en los headers
+      supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${userToken}`
+          }
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false
+        }
+      });
+      
+      // Establecer la sesión usando el token directamente
+      const { data: sessionData } = await supabaseClient.auth.getSession();
+      if (!sessionData?.session) {
+        // Si no hay sesión, establecerla manualmente
+        await supabaseClient.auth.setSession({
+          access_token: userToken,
+          refresh_token: '' // No necesitamos refresh token para esto
+        }).catch(err => {
+          console.warn('⚠️ No se pudo establecer sesión, continuando con headers:', err.message);
+        });
+      }
+    } else {
+      // Fallback: usar cliente sin autenticación (solo para lectura pública)
+      supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
     }
 
     console.log('☁️ Intentando subir a Supabase Storage...');
+    console.log('🔑 Usando token de autenticación:', userToken ? 'Sí' : 'No');
     
-    // Subir a Supabase Storage
-    const { data, error } = await supabase.storage
+    // Subir a Supabase Storage con el cliente autenticado
+    const { data, error } = await supabaseClient.storage
       .from('uploads')
       .upload(fileName, buffer, {
         contentType: `image/${imageType}`,
@@ -70,8 +105,9 @@ export async function uploadPhotoBase64(base64String, userId, type = 'general') 
 
     console.log('✅ Imagen subida a Supabase:', data?.path);
 
-    // Obtener URL pública
-    const { data: publicUrlData } = supabase.storage
+    // Obtener URL pública (puede usar cualquier cliente para esto)
+    const supabasePublic = createClient(supabaseUrl, supabaseAnonKey);
+    const { data: publicUrlData } = supabasePublic.storage
       .from('uploads')
       .getPublicUrl(fileName);
 

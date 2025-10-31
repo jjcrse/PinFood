@@ -51,9 +51,9 @@ export async function uploadImageBase64(req, res) {
 
     console.log('✅ Usuario autenticado:', user.id);
 
-    // Subir imagen
+    // Subir imagen - pasar el token para autenticación
     console.log('📤 Iniciando subida a Supabase Storage...');
-    const imageUrl = await uploadPhotoBase64(image, user.id, type || 'general');
+    const imageUrl = await uploadPhotoBase64(image, user.id, type || 'general', token);
     
     console.log('✅ Imagen subida exitosamente:', imageUrl);
     

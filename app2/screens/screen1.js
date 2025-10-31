@@ -4,33 +4,61 @@ export default function renderScreen1() {
   const app = document.getElementById("app");
 
   app.innerHTML = `
-    <div class="container">
-      <h1>🍕 Portal de Restaurantes</h1>
-      <p id="msg"></p>
-
-      <!-- SECCIÓN DE AUTENTICACIÓN -->
-      <div id="auth-section">
-        <div class="auth-form">
-          <h2>Registrar Restaurante</h2>
-          <form id="register-form">
-            <input type="text" id="reg-name" placeholder="Nombre del restaurante" required />
-            <input type="email" id="reg-email" placeholder="Correo electrónico" required />
-            <input type="password" id="reg-pass" placeholder="Contraseña" required />
-            <button type="submit">Registrar Restaurante</button>
-          </form>
+    <div class="auth-hero">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Welcome to</h2>
+          <h1>PinFood</h1>
         </div>
 
-        <div class="auth-form">
-          <h2>Iniciar Sesión</h2>
-          <form id="login-form">
-            <input type="email" id="login-email" placeholder="Correo electrónico" required />
-            <input type="password" id="login-pass" placeholder="Contraseña" required />
-            <button type="submit">Entrar</button>
-          </form>
+        <div class="auth-tabs">
+          <button class="auth-tab auth-tab-active" id="tab-register">Register your shop</button>
+          <button class="auth-tab" id="tab-login">Login as shop</button>
         </div>
+
+        <p id="msg" class="auth-msg"></p>
+
+        <form id="register-form" class="auth-form fancy">
+          <input type="email" id="reg-email" placeholder="Email" required />
+          <input type="password" id="reg-pass" placeholder="Password" required />
+          <input type="text" id="reg-name" placeholder="Shop name" required />
+          <button type="submit" class="btn-primary wide">Create shop</button>
+        </form>
+
+        <form id="login-form" class="auth-form fancy" style="display:none;">
+          <input type="email" id="login-email" placeholder="Email" required />
+          <input type="password" id="login-pass" placeholder="Password" required />
+          <button type="submit" class="btn-primary wide">SignIn</button>
+        </form>
+
+        <div class="auth-social">
+          <span class="dot">✖️</span>
+          <span class="dot">ⓖ</span>
+          <span class="dot">ⓕ</span>
+          <span class="dot">ⓘ</span>
+        </div>
+        <div class="auth-footer-link">create account</div>
       </div>
     </div>
   `;
+  // Tabs UI
+  const tabRegister = document.getElementById("tab-register");
+  const tabLogin = document.getElementById("tab-login");
+  const registerForm = document.getElementById("register-form");
+  const loginForm = document.getElementById("login-form");
+
+  tabRegister.addEventListener('click', () => {
+    tabRegister.classList.add('auth-tab-active');
+    tabLogin.classList.remove('auth-tab-active');
+    registerForm.style.display = '';
+    loginForm.style.display = 'none';
+  });
+  tabLogin.addEventListener('click', () => {
+    tabLogin.classList.add('auth-tab-active');
+    tabRegister.classList.remove('auth-tab-active');
+    registerForm.style.display = 'none';
+    loginForm.style.display = '';
+  });
 
   const msg = document.getElementById("msg");
 

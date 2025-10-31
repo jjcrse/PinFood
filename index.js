@@ -14,6 +14,7 @@ import feedRouter from "./server/routes/feed.router.js";
 import restaurantsRouter from "./server/routes/restaurants.router.js"; // 🍕 Restaurantes
 import profileRouter from "./server/routes/profile.router.js"; // 👤 Perfiles
 import savedPostsRouter from "./server/routes/savedPosts.router.js"; // 💾 Posts guardados
+import uploadsRouter from "./server/routes/uploads.router.js"; // 📤 Uploads
 
 // Servicio de Supabase
 import { supabase } from "./server/services/supabaseClient.js";
@@ -32,7 +33,8 @@ const __dirname = path.dirname(__filename);
 // MIDDLEWARES
 // ============================
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Aumentar límite para imágenes base64
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // ============================
 // ARCHIVOS ESTÁTICOS
@@ -51,6 +53,7 @@ app.use("/api/feed", feedRouter);
 app.use("/api/restaurants", restaurantsRouter); // 🍕 Restaurantes
 app.use("/api/profile", profileRouter); // 👤 Perfiles
 app.use("/api/saved-posts", savedPostsRouter); // 💾 Posts guardados
+app.use("/api/uploads", uploadsRouter); // 📤 Uploads
 
 // ============================
 // PRUEBA DE CONEXIÓN A SUPABASE

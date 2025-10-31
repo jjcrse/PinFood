@@ -1,4 +1,12 @@
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 import { supabase } from "../services/supabaseClient.js";
+
+dotenv.config();
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // 🔧 MODO DESARROLLO - Simular autenticación sin Supabase real
 const isDevelopmentMode = false; // Cambiar a false para usar Supabase real
@@ -42,10 +50,36 @@ export const register = async (req, res) => {
     }
 
     const user = authData.user;
+    const session = authData.session; // Puede ser null si requiere confirmación de email
     console.log("✅ Usuario creado en Auth:", user.id);
+    console.log("📧 Session:", session ? "Disponible" : "No disponible (puede requerir confirmación de email)");
 
     // 2️⃣ Insertar datos en la tabla pública
-    const { error: dbError } = await supabase.from("users").insert([
+    // Priorizar SERVICE_ROLE_KEY para evitar problemas de RLS
+    let supabaseClient;
+    if (supabaseServiceKey) {
+      console.log("🔑 Usando SERVICE_ROLE_KEY para insertar en users (bypass RLS)");
+      supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    } else if (session && session.access_token) {
+      // Si tenemos sesión del nuevo usuario, usar su token
+      console.log("🔑 Usando token del usuario recién creado");
+      supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`
+          }
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false
+        }
+      });
+    } else {
+      console.warn("⚠️ No hay SERVICE_ROLE_KEY ni sesión disponible, intentando con cliente anónimo (puede fallar por RLS)");
+      supabaseClient = supabase;
+    }
+
+    const { error: dbError } = await supabaseClient.from("users").insert([
       {
         id: user.id,
         full_name,
@@ -56,8 +90,20 @@ export const register = async (req, res) => {
 
     if (dbError) {
       console.error("❌ Error insertando en tabla users:", dbError.message);
+      console.error("❌ Error details:", dbError.details);
+      console.error("❌ Error hint:", dbError.hint);
+      
+      // Si falló por RLS y no tenemos SERVICE_ROLE_KEY, sugerir al usuario
+      if (dbError.message.includes('row-level security') && !supabaseServiceKey) {
+        return res.status(500).json({ 
+          error: "Error al crear perfil. Configura SUPABASE_SERVICE_ROLE_KEY en .env o ejecuta el script fix-users-rls-policy.sql en Supabase." 
+        });
+      }
+      
       return res.status(400).json({ error: dbError.message });
     }
+
+    console.log("✅ Usuario insertado en tabla users exitosamente");
 
     res.status(200).json({ 
       message: "Usuario registrado exitosamente", 
@@ -153,6 +199,46 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error general en login:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+// 🔄 REFRESCAR TOKEN
+export const refreshToken = async (req, res) => {
+  try {
+    const { refresh_token } = req.body;
+
+    if (!refresh_token) {
+      return res.status(400).json({ error: "refresh_token requerido" });
+    }
+
+    // 🔧 MODO DESARROLLO - Simular refresh exitoso
+    if (isDevelopmentMode) {
+      console.log("🔧 Modo desarrollo: Simulando refresh exitoso");
+      const mockSession = {
+        access_token: `demo_token_${Date.now()}`,
+        refresh_token: `demo_refresh_${Date.now()}`,
+        expires_at: Date.now() + 3600000, // 1 hora
+      };
+      return res.status(200).json({ session: mockSession });
+    }
+
+    // Usar Supabase para refrescar el token
+    const { data, error } = await supabase.auth.refreshSession({
+      refresh_token: refresh_token,
+    });
+
+    if (error) {
+      console.error("❌ Error al refrescar token:", error.message);
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(200).json({
+      session: data.session,
+      user: data.user,
+    });
+  } catch (error) {
+    console.error("❌ Error general en refreshToken:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };

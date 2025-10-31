@@ -1,4 +1,12 @@
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 import { supabase } from "../services/supabaseClient.js";
+
+dotenv.config();
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // 💾 GUARDAR PUBLICACIÓN
 export async function savePost(req, res) {
@@ -11,14 +19,34 @@ export async function savePost(req, res) {
     }
 
     const token = authHeader.split(" ")[1];
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    // Crear cliente autenticado
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      },
+      auth: {
+        persistSession: true,
+        autoRefreshToken: false
+      }
+    });
+
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
 
     if (userError || !user) {
       return res.status(401).json({ error: "Token inválido o expirado" });
     }
 
+    // Usar SERVICE_ROLE_KEY si está disponible para evitar problemas de RLS
+    let supabaseClient = supabaseAuth;
+    if (supabaseServiceKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    }
+
     // Verificar si ya está guardado
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseClient
       .from("saved_posts")
       .select("*")
       .eq("user_id", user.id)
@@ -30,7 +58,7 @@ export async function savePost(req, res) {
     }
 
     // Guardar el post
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from("saved_posts")
       .insert([{ user_id: user.id, post_id: postId }]);
 
@@ -54,14 +82,34 @@ export async function unsavePost(req, res) {
     }
 
     const token = authHeader.split(" ")[1];
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    // Crear cliente autenticado
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      },
+      auth: {
+        persistSession: true,
+        autoRefreshToken: false
+      }
+    });
+
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
 
     if (userError || !user) {
       return res.status(401).json({ error: "Token inválido o expirado" });
     }
 
+    // Usar SERVICE_ROLE_KEY si está disponible para evitar problemas de RLS
+    let supabaseClient = supabaseAuth;
+    if (supabaseServiceKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    }
+
     // Eliminar el guardado
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from("saved_posts")
       .delete()
       .eq("user_id", user.id)
@@ -83,8 +131,15 @@ export async function getSavedPosts(req, res) {
 
     console.log("📚 Obteniendo posts guardados para usuario:", userId);
 
+    // Usar SERVICE_ROLE_KEY si está disponible para evitar problemas de RLS
+    let supabaseClient = supabase;
+    if (supabaseServiceKey) {
+      console.log("🔑 Usando SERVICE_ROLE_KEY para leer saved_posts (bypass RLS)");
+      supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    }
+
     // Primero obtener los IDs de posts guardados
-    const { data: savedPosts, error: savedError } = await supabase
+    const { data: savedPosts, error: savedError } = await supabaseClient
       .from("saved_posts")
       .select("post_id, created_at")
       .eq("user_id", userId)
@@ -105,9 +160,9 @@ export async function getSavedPosts(req, res) {
     const postIds = savedPosts.map(sp => sp.post_id);
     console.log("📝 IDs de posts a buscar:", postIds);
 
-    const { data: posts, error: postsError } = await supabase
+    const { data: posts, error: postsError } = await supabaseClient
       .from("posts")
-      .select("id, content, image_url, created_at, user_id, restaurant_id")
+      .select("id, content, image_url, created_at, user_id, restaurant_id, location_lat, location_lng, location_name")
       .in("id", postIds);
 
     if (postsError) {
@@ -120,7 +175,7 @@ export async function getSavedPosts(req, res) {
     // Obtener información de usuarios y restaurantes
     const postsWithUsers = await Promise.all(
       posts.map(async (post) => {
-        const { data: user } = await supabase
+        const { data: user } = await supabaseClient
           .from("users")
           .select("id, full_name, email, profile_picture_url")
           .eq("id", post.user_id)
@@ -129,7 +184,7 @@ export async function getSavedPosts(req, res) {
         // Obtener info del restaurante (si está etiquetado)
         let restaurantData = null;
         if (post.restaurant_id) {
-          const { data: restaurant } = await supabase
+          const { data: restaurant } = await supabaseClient
             .from("restaurants")
             .select("id, restaurant_name, ubicacion")
             .eq("id", post.restaurant_id)
@@ -137,12 +192,12 @@ export async function getSavedPosts(req, res) {
           restaurantData = restaurant;
         }
 
-        const { count: likesCount } = await supabase
+        const { count: likesCount } = await supabaseClient
           .from("likes")
           .select("*", { count: "exact", head: true })
           .eq("post_id", post.id);
 
-        const { count: commentsCount } = await supabase
+        const { count: commentsCount } = await supabaseClient
           .from("comments")
           .select("*", { count: "exact", head: true })
           .eq("post_id", post.id);
@@ -181,13 +236,33 @@ export async function checkIfSaved(req, res) {
     }
 
     const token = authHeader.split(" ")[1];
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    // Crear cliente autenticado
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      },
+      auth: {
+        persistSession: true,
+        autoRefreshToken: false
+      }
+    });
+
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
 
     if (userError || !user) {
       return res.status(401).json({ error: "Token inválido o expirado" });
     }
 
-    const { data } = await supabase
+    // Usar SERVICE_ROLE_KEY si está disponible para evitar problemas de RLS
+    let supabaseClient = supabaseAuth;
+    if (supabaseServiceKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    }
+
+    const { data } = await supabaseClient
       .from("saved_posts")
       .select("id")
       .eq("user_id", user.id)

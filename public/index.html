@@ -8,44 +8,18 @@
 </head>
 <body>
   <div class="landing-container">
-    <!-- Hero Section -->
-    <div class="hero-section">
-      <div class="logo-container">
-        <h1 class="logo">🍕 PinFood</h1>
-        <p class="tagline">Comparte, descubre y conecta con la mejor comida</p>
-      </div>
-
-      <div class="selection-cards">
-        <!-- Tarjeta para Usuarios -->
-        <div class="card user-card" onclick="goToApp('user')">
-          <div class="card-icon">👥</div>
-          <h2>Soy Usuario</h2>
-          <p>Descubre restaurantes, comparte tus experiencias y guarda tus lugares favoritos</p>
-          <div class="card-features">
-            <span class="feature">📸 Publica fotos</span>
-            <span class="feature">⭐ Guarda favoritos</span>
-            <span class="feature">🍽️ Etiqueta restaurantes</span>
-          </div>
-          <button class="btn-primary">Continuar como Usuario</button>
+    <div class="glass-hero">
+      <div class="glass-card">
+        <h2 class="glass-welcome">Welcome to</h2>
+        <h1 class="glass-logo">PinFood</h1>
+        <div class="glass-actions">
+          <button class="glass-btn glass-primary" onclick="goToApp('restaurant')">Login as shop</button>
+          <button class="glass-btn" onclick="goToApp('user')">Login as user</button>
         </div>
-
-        <!-- Tarjeta para Restaurantes -->
-        <div class="card restaurant-card" onclick="goToApp('restaurant')">
-          <div class="card-icon">🍽️</div>
-          <h2>Soy Restaurante</h2>
-          <p>Gestiona tu perfil, ve las menciones de tus clientes y conecta con tu comunidad</p>
-          <div class="card-features">
-            <span class="feature">📊 Ve tus menciones</span>
-            <span class="feature">👥 Conoce a tus clientes</span>
-            <span class="feature">🎯 Gestiona tu perfil</span>
-          </div>
-          <button class="btn-secondary">Continuar como Restaurante</button>
+        <div class="glass-sub">create account</div>
+        <div class="glass-icons">
+          <span>✖️</span><span>ⓖ</span><span>ⓘ</span><span>ⓕ</span>
         </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="footer">
-        <p>© 2024 PinFood - La mejor forma de descubrir y compartir comida</p>
       </div>
     </div>
   </div>

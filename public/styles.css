@@ -6,23 +6,55 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
+  /* Fondo: imagen + degradado cálido. Reemplaza la URL cuando entregues tu imagen */
+  /* Mostrar la imagen tal cual, sin filtro */
+  background: url('/public/bg-mobile.png') center/cover no-repeat;
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
+  background-attachment: fixed;
 }
 
-.landing-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
+.landing-container { width: 100%; max-width: 420px; margin: 0 auto; }
 
-.hero-section {
-  text-align: center;
+/* Nueva landing móvil */
+.glass-hero { min-height: 100svh; display:flex; align-items:center; justify-content:center; }
+.glass-card {
+  width: min(360px, 92vw);
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.35);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 18px;
+  padding: 18px 16px 14px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.28);
+  text-align:center;
 }
+.glass-welcome { color:#fff; font-weight:600; opacity:.92; margin-bottom:4px }
+.glass-logo { color:#fff; text-shadow:0 4px 16px rgba(0,0,0,.2); margin-bottom:14px }
+.glass-actions { display:flex; flex-direction:column; gap:10px; margin-bottom:12px }
+/* Botones crema con texto naranja-rojizo */
+.glass-btn {
+  height:44px;
+  border-radius:999px;
+  border:1px solid #ffd7b8;
+  background:#fff3e6; /* crema */
+  color:#ff6a3d;      /* naranja rojizo */
+  font-weight:800;
+  letter-spacing:.2px;
+  box-shadow: 0 6px 18px rgba(255,106,61,.18);
+  transition: transform .15s ease, box-shadow .2s ease;
+  display:flex;            /* centrar contenido */
+  align-items:center;      /* vertical */
+  justify-content:center;  /* horizontal */
+  line-height:1;           /* evitar desplazamientos */
+}
+.glass-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(255,106,61,.28) }
+.glass-primary { background:#fff3e6; border:1px solid #ffd7b8; color:#ff6a3d }
+.glass-sub { color:#fff; opacity:.9; margin:6px 0 8px; font-weight:600 }
+.glass-icons { display:flex; justify-content:center; gap:14px; color:#fff; opacity:.95 }
 
 .logo-container {
   margin-bottom: 60px;
@@ -44,13 +76,8 @@ body {
   letter-spacing: 0.5px;
 }
 
-.selection-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 40px;
-  margin-bottom: 60px;
-  animation: fadeInUp 0.8s ease-out 0.2s backwards;
-}
+/* Ocultar layout de tarjetas anterior en móvil */
+.selection-cards { display:none; }
 
 .card {
   background: white;
@@ -70,7 +97,7 @@ body {
   left: 0;
   right: 0;
   height: 5px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #ff8a66 0%, #ffbd59 100%);
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
@@ -84,13 +111,8 @@ body {
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
 }
 
-.user-card:hover {
-  border-color: #667eea;
-}
-
-.restaurant-card:hover {
-  border-color: #ff6b6b;
-}
+.user-card:hover { border-color: #ff8a66; }
+.restaurant-card:hover { border-color: #ff8a66; }
 
 .card-icon {
   font-size: 4em;
@@ -98,13 +120,8 @@ body {
   animation: bounce 2s infinite;
 }
 
-.user-card .card-icon {
-  filter: drop-shadow(0 4px 10px rgba(102, 126, 234, 0.3));
-}
-
-.restaurant-card .card-icon {
-  filter: drop-shadow(0 4px 10px rgba(255, 107, 107, 0.3));
-}
+.user-card .card-icon { filter: drop-shadow(0 4px 10px rgba(255, 138, 102, 0.35)); }
+.restaurant-card .card-icon { filter: drop-shadow(0 4px 10px rgba(255, 138, 102, 0.35)); }
 
 .card h2 {
   font-size: 2em;
@@ -133,12 +150,9 @@ body {
   padding: 10px 15px;
   background: #f8f9fa;
   border-radius: 8px;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #ff8a66;
 }
-
-.restaurant-card .feature {
-  border-left-color: #ff6b6b;
-}
+.restaurant-card .feature { border-left-color: #ff8a66; }
 
 button {
   width: 100%;
@@ -154,26 +168,18 @@ button {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff8a66 0%, #ffbd59 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(255, 138, 102, 0.35);
 }
 
 .btn-primary:hover {
-  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 25px rgba(255, 138, 102, 0.55);
   transform: translateY(-2px);
 }
 
-.btn-secondary {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-}
-
-.btn-secondary:hover {
-  box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6);
-  transform: translateY(-2px);
-}
+.btn-secondary { background: linear-gradient(135deg, #ff8a66 0%, #ffbd59 100%); color:#fff; box-shadow:0 4px 15px rgba(255,138,102,.35) }
+.btn-secondary:hover { box-shadow:0 6px 25px rgba(255,138,102,.55); transform: translateY(-2px) }
 
 .footer {
   color: rgba(255, 255, 255, 0.8);
@@ -223,30 +229,9 @@ button {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .logo {
-    font-size: 3em;
-  }
-
-  .tagline {
-    font-size: 1.2em;
-  }
-
-  .selection-cards {
-    grid-template-columns: 1fr;
-    gap: 30px;
-  }
-
-  .card {
-    padding: 30px 20px;
-  }
-
-  .card h2 {
-    font-size: 1.6em;
-  }
-
-  .card p {
-    font-size: 1em;
-  }
+@media (min-width: 820px) {
+  .landing-container { max-width: 1200px; }
+  .selection-cards { display:grid; }
+  .glass-hero { display:none; }
 }
 

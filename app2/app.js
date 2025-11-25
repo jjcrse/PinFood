@@ -1,19 +1,12 @@
 import renderScreen1 from "./screens/screen1.js";
 import renderScreen2 from "./screens/screen2.js";
 
-// Socket.io (deshabilitado - no se usa tiempo real en app2)
+// ================================
+// 🔧 BACKEND BASE URL EN VERCEL
+// ================================
+const API_BASE = "https://pin-food.vercel.app";
+
 let socket = null;
-// Si necesitas tiempo real en el futuro, descomenta esto:
-// try {
-//   if (typeof io !== 'undefined') {
-//     socket = io("/", { path: "/real-time", timeout: 5000 });
-//     socket.on("connect_error", (err) => {
-//       console.log("Socket.io no disponible:", err.message);
-//     });
-//   }
-// } catch (err) {
-//   console.log("Socket.io no está disponible");
-// }
 
 function clearScripts() {
   document.getElementById("app").innerHTML = "";
@@ -50,21 +43,28 @@ function navigateTo(path, data) {
   renderRoute(route);
 }
 
-// Función helper para hacer peticiones
+// ==================================================
+// 🔧 Función helper corregida para usar Vercel siempre
+// ==================================================
 async function makeRequest(url, method = "GET", body = null) {
   try {
+    // Si la URL NO empieza por http, agregar el backend de Vercel
+    const finalUrl = url.startsWith("http")
+      ? url
+      : `${API_BASE}${url}`;
+
     const options = {
       method,
       headers: { "Content-Type": "application/json" },
     };
-    
+
     if (body) {
       options.body = JSON.stringify(body);
     }
-    
-    const res = await fetch(url, options);
+
+    const res = await fetch(finalUrl, options);
     const data = await res.json();
-    
+
     return { ok: res.ok, status: res.status, data };
   } catch (error) {
     console.error("Error en petición:", error);

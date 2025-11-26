@@ -1,4 +1,4 @@
-import { navigateTo } from "../app.js";
+import { navigateTo, API_BASE_URL } from "../app.js";
 
 // Importar utilidades de imagen (si las necesitamos, crearlas después)
 // import { showImageSourceModal, uploadImageToSupabase } from '../utils/imageUpload.js';
@@ -121,7 +121,7 @@ export default function renderScreen2(data) {
             
             // Subir imagen (necesitamos crear este endpoint o usar el mismo de users)
             try {
-              const uploadRes = await fetch('http://localhost:3000/api/uploads/base64', {
+              const uploadRes = await fetch(`${API_BASE_URL}/api/uploads/base64`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ async function guardarPerfilRestaurante(restaurantId) {
   const profile_picture_url = document.getElementById("edit-restaurant-picture-url").value.trim();
 
   try {
-    const res = await fetch(`http://localhost:3000/api/restaurants/${restaurantId}`, {
+    const res = await fetch(`${API_BASE_URL}/api/restaurants/${restaurantId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -213,7 +213,7 @@ async function loadRestaurantPosts(restaurantId) {
   try {
     console.log("📝 Cargando posts para restaurante:", restaurantId);
     
-    const res = await fetch(`http://localhost:3000/api/restaurants/${restaurantId}/posts`);
+    const res = await fetch(`${API_BASE_URL}/api/restaurants/${restaurantId}/posts`);
     const data = await res.json();
 
     if (!res.ok) {

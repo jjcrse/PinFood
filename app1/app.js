@@ -1,8 +1,17 @@
 // 📤 Importar utilidades de upload de imágenes
 import { showImageSourceModal, uploadImageToSupabase } from './utils/imageUpload.js';
 
-const API_URL = "http://localhost:3000/api/auth";
-const FEED_API_URL = "http://localhost:3000/api/feed";
+// 🔧 CONFIGURACIÓN DE API - Detecta automáticamente si está en desarrollo o producción
+const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE_URL = isDevelopment 
+  ? "http://localhost:3000" 
+  : "https://pin-food-95bb.vercel.app";
+
+const API_URL = `${API_BASE_URL}/api/auth`;
+const FEED_API_URL = `${API_BASE_URL}/api/feed`;
+const PROFILE_API_URL = `${API_BASE_URL}/api/profile`;
+const RESTAURANTS_API_URL = `${API_BASE_URL}/api/restaurants`;
+const SAVED_POSTS_API_URL = `${API_BASE_URL}/api/saved-posts`;
 const msg = document.getElementById("msg");
 
 // 🔑 FUNCIÓN AUXILIAR PARA OBTENER TOKEN DE FORMA SEGURA
@@ -1041,7 +1050,7 @@ async function cargarMiPerfil() {
   console.log("🆔 currentUser.id:", currentUser.id);
 
   try {
-    const res = await fetch(`http://localhost:3000/api/profile/${currentUser.id}`);
+    const res = await fetch(`${PROFILE_API_URL}/${currentUser.id}`);
     const data = await res.json();
 
     if (!res.ok) {
@@ -1202,7 +1211,7 @@ async function cargarPostsGuardados(userId) {
 
   try {
     console.log("📚 Obteniendo posts guardados para usuario:", userId);
-    const res = await fetch(`http://localhost:3000/api/saved-posts/user/${userId}`);
+    const res = await fetch(`${SAVED_POSTS_API_URL}/user/${userId}`);
     
     if (!res.ok) {
       const errorText = await res.text();
@@ -1273,7 +1282,7 @@ async function guardarPerfil(userId) {
   }
 
   try {
-    const res = await fetch(`http://localhost:3000/api/profile/${userId}`, {
+    const res = await fetch(`${PROFILE_API_URL}/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -1306,7 +1315,7 @@ window.verPerfilUsuario = async function(userId, userName) {
   profileContent.innerHTML = "<p>Cargando perfil...</p>";
 
   try {
-    const res = await fetch(`http://localhost:3000/api/profile/${userId}`);
+    const res = await fetch(`${PROFILE_API_URL}/${userId}`);
     const data = await res.json();
 
     if (!res.ok) {
@@ -1516,8 +1525,8 @@ async function cargarRestaurantes(query = "") {
 
   try {
     const url = query 
-      ? `http://localhost:3000/api/restaurants/search?query=${encodeURIComponent(query)}`
-      : `http://localhost:3000/api/restaurants/search`;
+      ? `${RESTAURANTS_API_URL}/search?query=${encodeURIComponent(query)}`
+      : `${RESTAURANTS_API_URL}/search`;
 
     console.log("🔍 Buscando restaurantes:", query || "todos");
     
@@ -1590,7 +1599,7 @@ async function cargarRestaurantesParaSelect(selectId) {
 
   try {
     console.log(`📋 Cargando restaurantes para select: ${selectId}`);
-    const res = await fetch("http://localhost:3000/api/restaurants/search");
+    const res = await fetch(`${RESTAURANTS_API_URL}/search`);
     const data = await res.json();
 
     if (!res.ok) {
@@ -1642,7 +1651,7 @@ window.toggleSavePost = async function(postId) {
 
   try {
     // Primero verificar si ya está guardado
-    const checkRes = await fetch(`http://localhost:3000/api/saved-posts/${postId}/check`, {
+    const checkRes = await fetch(`${SAVED_POSTS_API_URL}/${postId}/check`, {
       headers: {
         "Authorization": `Bearer ${token}`,
       },
@@ -1652,7 +1661,7 @@ window.toggleSavePost = async function(postId) {
 
     if (checkData.isSaved) {
       // Si ya está guardado, quitarlo
-      const res = await fetch(`http://localhost:3000/api/saved-posts/${postId}`, {
+      const res = await fetch(`${SAVED_POSTS_API_URL}/${postId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -1667,7 +1676,7 @@ window.toggleSavePost = async function(postId) {
       }
     } else {
       // Si no está guardado, guardarlo
-      const res = await fetch(`http://localhost:3000/api/saved-posts/${postId}`, {
+      const res = await fetch(`${SAVED_POSTS_API_URL}/${postId}`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

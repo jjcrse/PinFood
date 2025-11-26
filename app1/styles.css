@@ -1,10 +1,5 @@
 /* Fondo general móvil con imagen - Solo para auth */
-#auth-section {
-  background: url('/public/bg-mobile.png') center/cover no-repeat;
-  background-attachment: fixed;
-  min-height: 100vh;
-  width: 100%;
-}
+/* Nota: Los estilos completos de #auth-section están más abajo */
 * {
   margin: 0;
   padding: 0;
@@ -75,12 +70,18 @@ h3 {
 
 /* SECCIÓN DE AUTENTICACIÓN */
 #auth-section {
+  background: url('/public/bg-mobile.png') center/cover no-repeat;
+  background-attachment: fixed;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: 30px;
   width: 100%;
+  min-height: 100vh;
   margin: 0;
-  padding: 0;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* .auth-form - estilos movidos a .auth-card .auth-form más abajo */
@@ -1435,10 +1436,12 @@ h3 {
   display: flex; 
   justify-content: center; 
   align-items: center; 
-  width: 100%; 
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto; 
   padding: 0;
   position: relative;
+  min-height: 100%;
 }
 .auth-card { 
   width: min(520px, 92vw); 

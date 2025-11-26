@@ -157,8 +157,35 @@ export const getFeed = async (req, res) => {
   try {
     console.log("📰 Obteniendo feed...");
     
-    // Obtener posts - intentar primero con cliente anónimo
+    // Validar que tenemos las variables necesarias
+    if (!supabaseUrl) {
+      console.error("❌ SUPABASE_URL no está definido");
+      return res.status(500).json({ 
+        error: "Error de configuración: SUPABASE_URL no está definido" 
+      });
+    }
+    
+    // Determinar qué cliente usar: preferir SERVICE_ROLE_KEY si está disponible para evitar problemas de RLS
     let supabaseClient = supabase;
+    let usingServiceKey = false;
+    
+    if (supabaseUrl && supabaseServiceKey) {
+      console.log("🔑 Usando SERVICE_ROLE_KEY para obtener feed (bypass RLS)");
+      try {
+        supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+        usingServiceKey = true;
+      } catch (clientError) {
+        console.error("❌ Error al crear cliente con SERVICE_ROLE_KEY:", clientError);
+        console.warn("⚠️ Fallando a cliente anónimo...");
+        supabaseClient = supabase;
+      }
+    } else {
+      console.log("🔑 Usando cliente anónimo (puede fallar si RLS está muy restrictivo)");
+      if (!supabaseServiceKey) {
+        console.warn("⚠️ SUPABASE_SERVICE_ROLE_KEY no está definido - puede causar errores de RLS");
+      }
+    }
+    
     let postsToProcess = [];
     
     let { data: posts, error: postsError } = await supabaseClient
@@ -171,28 +198,42 @@ export const getFeed = async (req, res) => {
       console.error("❌ Error code:", postsError.code);
       console.error("❌ Error details:", postsError.details);
       console.error("❌ Error hint:", postsError.hint);
+      console.error("❌ Error message:", postsError.message);
       
-      // Si es error de RLS y tenemos SERVICE_ROLE_KEY, intentar con ese
-      if (postsError.message && postsError.message.includes('row-level security') && supabaseServiceKey) {
-        console.warn("⚠️ Error de RLS detectado, intentando con SERVICE_ROLE_KEY...");
-        supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
-        const { data: servicePosts, error: serviceError } = await supabaseClient
-          .from("posts")
-          .select("id, content, image_url, created_at, user_id, restaurant_id, location_lat, location_lng, location_name")
-          .order("created_at", { ascending: false });
-        
-        if (serviceError) {
+      // Si estamos usando cliente anónimo y falló, intentar con SERVICE_ROLE_KEY si está disponible
+      if (!usingServiceKey && supabaseUrl && supabaseServiceKey) {
+        console.warn("⚠️ Error con cliente anónimo, intentando con SERVICE_ROLE_KEY...");
+        try {
+          supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+          const { data: servicePosts, error: serviceError } = await supabaseClient
+            .from("posts")
+            .select("id, content, image_url, created_at, user_id, restaurant_id, location_lat, location_lng, location_name")
+            .order("created_at", { ascending: false });
+          
+          if (serviceError) {
+            console.error("❌ Error incluso con SERVICE_ROLE_KEY:", serviceError);
+            return res.status(500).json({ 
+              error: "Error al obtener posts: " + serviceError.message,
+              details: serviceError.details,
+              code: serviceError.code
+            });
+          }
+          
+          postsToProcess = servicePosts || [];
+          console.log(`✅ Se obtuvieron ${postsToProcess.length} posts usando SERVICE_ROLE_KEY`);
+        } catch (clientError) {
+          console.error("❌ Error al crear cliente con SERVICE_ROLE_KEY:", clientError);
           return res.status(500).json({ 
-            error: "Error al obtener posts: " + serviceError.message,
-            details: serviceError.details 
+            error: "Error al obtener posts: " + postsError.message,
+            details: postsError.details 
           });
         }
-        
-        postsToProcess = servicePosts || [];
       } else {
         return res.status(500).json({ 
           error: "Error al obtener posts: " + postsError.message,
-          details: postsError.details 
+          details: postsError.details,
+          code: postsError.code,
+          hint: postsError.hint
         });
       }
     } else {
@@ -278,6 +319,22 @@ export const getFeed = async (req, res) => {
   } catch (error) {
     console.error("❌ Error general en getFeed:", error);
     console.error("❌ Stack:", error.stack);
+    console.error("❌ Error name:", error.name);
+    console.error("❌ Error message:", error.message);
+    
+    // Detectar errores de conexión específicos
+    if (error.message && (
+      error.message.includes('fetch failed') || 
+      error.message.includes('network') ||
+      error.message.includes('ECONNREFUSED') ||
+      error.message.includes('timeout')
+    )) {
+      return res.status(503).json({ 
+        error: "Error de conexión con Supabase. Verifica que el servicio esté activo.",
+        message: error.message
+      });
+    }
+    
     res.status(500).json({ 
       error: "Error interno del servidor: " + error.message,
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined

@@ -142,15 +142,23 @@ export function capturePhotoFromCamera() {
  * @param {string} token - Token de autenticación
  * @returns {Promise<string>} URL pública de la imagen subida
  */
+// 🔧 CONFIGURACIÓN DE API - Detecta automáticamente si está en desarrollo o producción
+const isDevelopment = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const API_BASE_URL = isDevelopment 
+  ? "http://localhost:3000" 
+  : "https://pin-food-95bb.vercel.app";
+const UPLOADS_API_URL = `${API_BASE_URL}/api/uploads`;
+const AUTH_API_URL = `${API_BASE_URL}/api/auth`;
+
 export async function uploadImageToSupabase(base64Image, type, token) {
   try {
     console.log('📤 Iniciando upload de imagen...');
-    console.log('📍 URL:', 'http://localhost:3000/api/uploads/base64');
+    console.log('📍 URL:', `${UPLOADS_API_URL}/base64`);
     console.log('🔑 Token presente:', !!token);
     console.log('📦 Tipo:', type);
     console.log('📊 Tamaño base64:', Math.round(base64Image.length / 1024), 'KB');
 
-    const res = await fetch('http://localhost:3000/api/uploads/base64', {
+    const res = await fetch(`${UPLOADS_API_URL}/base64`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -192,7 +200,7 @@ export async function uploadImageToSupabase(base64Image, type, token) {
         
         if (newToken) {
           // Reintentar con el nuevo token
-          const retryRes = await fetch('http://localhost:3000/api/uploads/base64', {
+          const retryRes = await fetch(`${UPLOADS_API_URL}/base64`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -250,7 +258,7 @@ async function refrescarTokenSiExpirado() {
     console.log("🔄 Intentando refrescar token usando el backend...");
     
     // Intentar refrescar usando nuestro backend
-    const refreshRes = await fetch('http://localhost:3000/api/auth/refresh', {
+    const refreshRes = await fetch(`${AUTH_API_URL}/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

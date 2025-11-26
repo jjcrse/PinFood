@@ -1,4 +1,4 @@
-import { navigateTo, makeRequest } from "../app.js";
+import { navigateTo, makeRequest, API_BASE_URL } from "../app.js";
 
 export default function renderScreen1() {
   const app = document.getElementById("app");
@@ -76,7 +76,7 @@ export default function renderScreen1() {
     }
 
     const result = await makeRequest(
-      "http://localhost:3000/api/restaurants/register",
+      `${API_BASE_URL}/api/restaurants/register`,
       "POST",
       { restaurant_name, email, password }
     );
@@ -118,7 +118,7 @@ export default function renderScreen1() {
     }
 
     const result = await makeRequest(
-      "http://localhost:3000/api/restaurants/login",
+      `${API_BASE_URL}/api/restaurants/login`,
       "POST",
       { email, password }
     );

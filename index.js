@@ -32,7 +32,33 @@ const __dirname = path.dirname(__filename);
 // ============================
 // MIDDLEWARES
 // ============================
-app.use(cors());
+// Configurar CORS para permitir todos los dominios de Vercel
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5050',
+  'https://pin-food-95bb.vercel.app',
+  'https://pin-food-26he.vercel.app',
+  'https://pinfoodapp1.vercel.app',
+  'https://pin-food-z41s.vercel.app',
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (como mobile apps o curl)
+    if (!origin) return callback(null, true);
+    
+    // Permitir si está en la lista o si es desarrollo local
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      // En producción, solo permitir orígenes conocidos
+      callback(null, true); // Por ahora permitimos todos, pero puedes restringir aquí
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json({ limit: '50mb' })); // Aumentar límite para imágenes base64
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 

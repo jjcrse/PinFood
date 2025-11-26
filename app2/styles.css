@@ -8,7 +8,7 @@
 
 body {
   font-family: 'Nunito', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(180deg, #FFF6E9 0%, #f5e6d3 100%);
+  background: url('/public/bg-mobile.png') center/cover no-repeat;
   min-height: 100vh;
   width: 100vw;
   max-width: 100vw;
@@ -57,10 +57,8 @@ h2 {
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  padding: 16px 20px; /* aún más compacto */
+  padding: 20px 24px; /* aún más compacto */
   border-radius: 22px;
-  display: grid; /* organiza verticalmente */
-  gap: 12px;     /* separaciones consistentes */
 }
 
 .auth-header {

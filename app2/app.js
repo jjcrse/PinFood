@@ -1,6 +1,12 @@
 import renderScreen1 from "./screens/screen1.js";
 import renderScreen2 from "./screens/screen2.js";
 
+// 🔧 CONFIGURACIÓN DE API - Detecta automáticamente si está en desarrollo o producción
+const isDevelopment = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+export const API_BASE_URL = isDevelopment 
+  ? "http://localhost:3000" 
+  : "https://pin-food-95bb.vercel.app";
+
 // Socket.io (deshabilitado - no se usa tiempo real en app2)
 let socket = null;
 // Si necesitas tiempo real en el futuro, descomenta esto:

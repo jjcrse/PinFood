@@ -36,29 +36,54 @@ const __dirname = path.dirname(__filename);
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5050',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5050',
   'https://pin-food-95bb.vercel.app',
   'https://pin-food-26he.vercel.app',
   'https://pinfoodapp1.vercel.app',
   'https://pin-food-z41s.vercel.app',
 ];
 
-app.use(cors({
+// Configuración de CORS más permisiva para Vercel
+// En Vercel serverless, es mejor ser más permisivo con los orígenes
+const corsOptions = {
   origin: function (origin, callback) {
-    // Permitir requests sin origin (como mobile apps o curl)
-    if (!origin) return callback(null, true);
+    // Permitir requests sin origin (como mobile apps, Postman, curl, o server-side requests)
+    if (!origin) {
+      return callback(null, true);
+    }
     
-    // Permitir si está en la lista o si es desarrollo local
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+    // Permitir si está en la lista de orígenes permitidos
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      // Permitir cualquier localhost en desarrollo
+      callback(null, true);
+    } else if (origin.includes('vercel.app')) {
+      // Permitir cualquier dominio de Vercel (incluye variaciones como *.vercel.app)
       callback(null, true);
     } else {
-      // En producción, solo permitir orígenes conocidos
-      callback(null, true); // Por ahora permitimos todos, pero puedes restringir aquí
+      // En producción, rechazar otros orígenes (pero podemos ser más permisivos si es necesario)
+      console.warn(`⚠️ CORS: Origen no permitido: ${origin}`);
+      // Por ahora permitimos todos para debugging, luego podemos restringir
+      callback(null, true);
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  maxAge: 86400, // Cache preflight por 24 horas
+};
+
+// Aplicar CORS a todas las rutas ANTES de cualquier otro middleware
+app.use(cors(corsOptions));
+
+// Manejar explícitamente las solicitudes OPTIONS (preflight) para todas las rutas API
+app.options('/api/*', cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '50mb' })); // Aumentar límite para imágenes base64
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 

@@ -45,52 +45,82 @@ const allowedOrigins = [
 ];
 
 // Middleware personalizado de CORS para Vercel serverless
+// Este middleware DEBE ejecutarse antes que cualquier otro
 const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin;
   
-  // Determinar si el origen está permitido
-  let isAllowed = false;
+  // Determinar si el origen está permitido - ser muy permisivo con Vercel
+  let allowedOrigin = null;
+  
   if (!origin) {
-    isAllowed = true; // Permitir requests sin origin
+    // Requests sin origin (server-side, Postman, etc.)
+    allowedOrigin = '*';
   } else if (allowedOrigins.indexOf(origin) !== -1) {
-    isAllowed = true;
+    // Origen en la lista permitida
+    allowedOrigin = origin;
   } else if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-    isAllowed = true;
+    // Cualquier localhost
+    allowedOrigin = origin;
   } else if (origin.includes('vercel.app')) {
-    isAllowed = true;
+    // Cualquier dominio de Vercel
+    allowedOrigin = origin;
+  } else {
+    // Por seguridad, en producción solo permitir Vercel
+    if (process.env.NODE_ENV === 'production') {
+      console.warn(`⚠️ CORS: Origen no permitido en producción: ${origin}`);
+    }
+    allowedOrigin = origin; // Permitir por ahora para debugging
   }
   
-  if (isAllowed && origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else if (isAllowed) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+  // Establecer headers CORS en TODAS las respuestas
+  if (allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   }
-  
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Max-Age', '86400');
   
-  // Manejar solicitudes OPTIONS (preflight)
+  // Manejar solicitudes OPTIONS (preflight) - CRÍTICO para CORS
   if (req.method === 'OPTIONS') {
+    console.log(`✅ OPTIONS preflight desde: ${origin}`);
     return res.status(204).end();
   }
   
   next();
 };
 
-// Aplicar middleware de CORS personalizado ANTES de cualquier otra cosa
+// Aplicar middleware de CORS personalizado PRIMERO, antes de cualquier otra cosa
+// Esto es CRÍTICO - debe estar antes de express.json() y cualquier ruta
 app.use(corsMiddleware);
 
-// También aplicar cors de la librería como respaldo
+// Handler específico para OPTIONS en todas las rutas API (doble protección)
+app.options('/api/*', (req, res) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  res.status(204).end();
+});
+
+// También aplicar cors de la librería como respaldo adicional
 const corsOptions = {
   origin: function (origin, callback) {
+    // Ser muy permisivo - permitir todo lo que sea Vercel o localhost
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
     if (origin.includes('localhost') || origin.includes('127.0.0.1')) return callback(null, true);
     if (origin.includes('vercel.app')) return callback(null, true);
-    callback(null, true); // Permitir todos por ahora
+    // En producción, solo permitir Vercel
+    if (process.env.NODE_ENV === 'production' && !origin.includes('vercel.app')) {
+      return callback(new Error('Not allowed by CORS'));
+    }
+    callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

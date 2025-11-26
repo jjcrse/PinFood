@@ -44,30 +44,53 @@ const allowedOrigins = [
   'https://pin-food-z41s.vercel.app',
 ];
 
-// Configuración de CORS más permisiva para Vercel
-// En Vercel serverless, es mejor ser más permisivo con los orígenes
+// Middleware personalizado de CORS para Vercel serverless
+const corsMiddleware = (req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Determinar si el origen está permitido
+  let isAllowed = false;
+  if (!origin) {
+    isAllowed = true; // Permitir requests sin origin
+  } else if (allowedOrigins.indexOf(origin) !== -1) {
+    isAllowed = true;
+  } else if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    isAllowed = true;
+  } else if (origin.includes('vercel.app')) {
+    isAllowed = true;
+  }
+  
+  if (isAllowed && origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else if (isAllowed) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  
+  // Manejar solicitudes OPTIONS (preflight)
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  
+  next();
+};
+
+// Aplicar middleware de CORS personalizado ANTES de cualquier otra cosa
+app.use(corsMiddleware);
+
+// También aplicar cors de la librería como respaldo
 const corsOptions = {
   origin: function (origin, callback) {
-    // Permitir requests sin origin (como mobile apps, Postman, curl, o server-side requests)
-    if (!origin) {
-      return callback(null, true);
-    }
-    
-    // Permitir si está en la lista de orígenes permitidos
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      // Permitir cualquier localhost en desarrollo
-      callback(null, true);
-    } else if (origin.includes('vercel.app')) {
-      // Permitir cualquier dominio de Vercel (incluye variaciones como *.vercel.app)
-      callback(null, true);
-    } else {
-      // En producción, rechazar otros orígenes (pero podemos ser más permisivos si es necesario)
-      console.warn(`⚠️ CORS: Origen no permitido: ${origin}`);
-      // Por ahora permitimos todos para debugging, luego podemos restringir
-      callback(null, true);
-    }
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) return callback(null, true);
+    if (origin.includes('vercel.app')) return callback(null, true);
+    callback(null, true); // Permitir todos por ahora
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -75,15 +98,10 @@ const corsOptions = {
   exposedHeaders: ['Content-Type', 'Authorization'],
   preflightContinue: false,
   optionsSuccessStatus: 204,
-  maxAge: 86400, // Cache preflight por 24 horas
+  maxAge: 86400,
 };
 
-// Aplicar CORS a todas las rutas ANTES de cualquier otro middleware
 app.use(cors(corsOptions));
-
-// Manejar explícitamente las solicitudes OPTIONS (preflight) para todas las rutas API
-app.options('/api/*', cors(corsOptions));
-app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '50mb' })); // Aumentar límite para imágenes base64
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PinFood - Tu red social de comida favorita</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/public/styles.css">
 </head>
 <body>
   <div class="landing-container">
@@ -14,12 +14,12 @@
         <h1 class="glass-logo">PinFood</h1>
 
         <div class="glass-actions">
-          <!-- AHORA LOS BOTONES ENVIAN LA URL DIRECTA DE LA APP -->
-          <button class="glass-btn glass-primary" onclick="goToApp('https://pin-food-26he.vercel.app/')">
+          <!-- Los botones usan el script que detecta desarrollo/producción -->
+          <button class="glass-btn glass-primary" onclick="goToApp('shop')">
             Login as shop
           </button>
 
-          <button class="glass-btn" onclick="goToApp('https://pinfoodapp1.vercel.app/')">
+          <button class="glass-btn" onclick="goToApp('user')">
             Login as user
           </button>
         </div>
@@ -33,6 +33,6 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="/public/script.js"></script>
 </body>
 </html>

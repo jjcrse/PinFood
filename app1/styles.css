@@ -70,8 +70,7 @@ h3 {
 
 /* SECCIÓN DE AUTENTICACIÓN */
 #auth-section {
-  /* Usar URL del backend para la imagen en producción, o ruta relativa en desarrollo */
-  background: url('https://pin-food-95bb.vercel.app/public/bg-mobile.png') center/cover no-repeat;
+  background: url('bg-mobile copy.png') center/cover no-repeat;
   background-attachment: fixed;
   display: flex;
   flex-direction: column;
@@ -1442,7 +1441,8 @@ h3 {
   margin: 0 auto; 
   padding: 0;
   position: relative;
-  min-height: 100%;
+  min-height: 100vh;
+  height: 100%;
 }
 .auth-card { 
   width: min(520px, 92vw); 

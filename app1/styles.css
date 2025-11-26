@@ -1,14 +1,5 @@
 /* Fondo general móvil con imagen - Solo para auth */
-<<<<<<< HEAD
 /* Nota: Los estilos completos de #auth-section están más abajo */
-=======
-#auth-section {
-  background: url('bg-mobile copy.png') center/cover no-repeat;
-  background-attachment: fixed;
-  min-height: 100vh;
-  width: 100%;
-}
->>>>>>> 9d6f2e9f5d4a58b6fe2fb22117474dc3bb8f46de
 * {
   margin: 0;
   padding: 0;
@@ -79,7 +70,8 @@ h3 {
 
 /* SECCIÓN DE AUTENTICACIÓN */
 #auth-section {
-  background: url('/public/bg-mobile.png') center/cover no-repeat;
+  /* Usar URL del backend para la imagen en producción, o ruta relativa en desarrollo */
+  background: url('https://pin-food-95bb.vercel.app/public/bg-mobile.png') center/cover no-repeat;
   background-attachment: fixed;
   display: flex;
   flex-direction: column;
@@ -1458,7 +1450,7 @@ h3 {
   border: 1px solid rgba(255,255,255,0.35); 
   backdrop-filter: blur(28px); 
   -webkit-backdrop-filter: blur(28px); 
-  box-shadow: 0 12px 36px rgba(0,0,0,.22); 
+  box-shadow: 0 12px 36px rgba(0,0,0,.25); 
   padding: 20px 24px; 
   border-radius: 22px;
 }

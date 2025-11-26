@@ -8,7 +8,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   /* Fondo: imagen + degradado cálido. Reemplaza la URL cuando entregues tu imagen */
   /* Mostrar la imagen tal cual, sin filtro */
-  background: url('/public/bg-mobile.png') center/cover no-repeat;
+  background: url('bg-mobile.png') center/cover no-repeat;
   min-height: 100svh;
   display: flex;
   align-items: center;

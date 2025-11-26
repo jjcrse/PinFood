@@ -1,5 +1,14 @@
 /* Fondo general móvil con imagen - Solo para auth */
+<<<<<<< HEAD
 /* Nota: Los estilos completos de #auth-section están más abajo */
+=======
+#auth-section {
+  background: url('bg-mobile copy.png') center/cover no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  width: 100%;
+}
+>>>>>>> 9d6f2e9f5d4a58b6fe2fb22117474dc3bb8f46de
 * {
   margin: 0;
   padding: 0;
